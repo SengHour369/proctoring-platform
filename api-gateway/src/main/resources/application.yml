@@ -1,0 +1,136 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/identity/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: identityServiceCB
+                fallbackUri: forward:/fallback/identity
+
+        - id: exam-service
+          uri: lb://exam-service
+          predicates:
+            - Path=/api/exams/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: examServiceCB
+                fallbackUri: forward:/fallback/exams
+
+        - id: attempt-service
+          uri: lb://attempt-service
+          predicates:
+            - Path=/api/attempts/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: attemptServiceCB
+                fallbackUri: forward:/fallback/attempts
+
+        - id: proctoring-service
+          uri: lb://proctoring-service
+          predicates:
+            - Path=/api/proctoring/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: proctoringServiceCB
+                fallbackUri: forward:/fallback/proctoring
+
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: reviewServiceCB
+                fallbackUri: forward:/fallback/reviews
+
+        - id: result-service
+          uri: lb://result-service
+          predicates:
+            - Path=/api/results/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: resultServiceCB
+                fallbackUri: forward:/fallback/results
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceCB
+                fallbackUri: forward:/fallback/payments
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: notificationServiceCB
+                fallbackUri: forward:/fallback/notifications
+
+        - id: config-service
+          uri: lb://config-service
+          predicates:
+            - Path=/api/config/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: configServiceCB
+                fallbackUri: forward:/fallback/config
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,circuitbreakers
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 20
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 4s

@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proctoring-service
+  namespace: proctoring-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: proctoring-service
+  template:
+    metadata:
+      labels:
+        app: proctoring-service
+    spec:
+      containers:
+        - name: proctoring-service
+          image: proctoring-platform/proctoring-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8084
+          env:
+            - name: EUREKA_HOST
+              value: eureka-server
+            - name: CONFIG_SERVER_HOST
+              value: config-server
+            - name: DB_HOST
+              value: postgres
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            httpGet: { path: /actuator/health, port: 8084 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health, port: 8084 }
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: 1, memory: 1Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proctoring-service
+  namespace: proctoring-platform
+spec:
+  selector:
+    app: proctoring-service
+  ports:
+    - port: 8084
+      targetPort: 8084

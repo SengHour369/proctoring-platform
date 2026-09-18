@@ -1,0 +1,13 @@
+rootProject.name = 'proctoring-platform'
+
+include 'eureka-server'
+include 'config-server'
+include 'api-gateway'
+include 'identity-service'
+include 'exam-service'
+include 'attempt-service'
+include 'proctoring-service'
+include 'result-service'
+include 'payment-service'
+include 'notification-service'
+include 'config-service'

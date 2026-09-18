@@ -1,0 +1,71 @@
+package com.example.identityservice.web;
+
+import com.example.identityservice.user.dto.CreatedAccount;
+import com.example.identityservice.user.dto.UserProfileView;
+import com.example.identityservice.user.service.TeacherService;
+import com.example.identityservice.web.dto.CreateUserRequest;
+import com.example.identityservice.web.dto.DisableUserRequest;
+import com.example.identityservice.web.dto.UpdateUserRequest;
+import com.example.identityservice.web.dto.mapper.UserRequestMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/** §2.2 Teacher Management. Same shape as {@link StudentController}. */
+@RestController
+@RequestMapping("/api/teachers")
+public class TeacherController {
+
+    private final TeacherService teacherService;
+    private final RequestContextResolver requestContextResolver;
+
+    public TeacherController(TeacherService teacherService, RequestContextResolver requestContextResolver) {
+        this.teacherService = teacherService;
+        this.requestContextResolver = requestContextResolver;
+    }
+
+    @PostMapping
+    public ResponseEntity<CreatedAccount> createTeacher(
+            @Valid @RequestBody CreateUserRequest request,
+            @RequestHeader("X-Actor-User-Id") Long actorUserId,
+            HttpServletRequest httpRequest) {
+        CreatedAccount account = teacherService.createTeacher(
+                UserRequestMapper.toCommand(request), actorUserId, requestContextResolver.resolve(httpRequest));
+        return ResponseEntity.ok(account);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateTeacher(
+            @PathVariable Long userId,
+            @RequestBody UpdateUserRequest request,
+            @RequestHeader("X-Actor-User-Id") Long actorUserId,
+            HttpServletRequest httpRequest) {
+        teacherService.updateTeacher(
+                userId, UserRequestMapper.toCommand(request), actorUserId, requestContextResolver.resolve(httpRequest));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/disable")
+    public ResponseEntity<Void> disableTeacher(
+            @PathVariable Long userId,
+            @Valid @RequestBody DisableUserRequest request,
+            @RequestHeader("X-Actor-User-Id") Long actorUserId) {
+        teacherService.disableTeacher(userId, request.mode(), request.reason(), actorUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileView> getProfile(
+            @PathVariable Long userId,
+            @RequestHeader("X-Actor-User-Id") Long actorUserId) {
+        return ResponseEntity.ok(teacherService.getProfile(userId, actorUserId));
+    }
+}

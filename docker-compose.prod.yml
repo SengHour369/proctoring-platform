@@ -1,0 +1,194 @@
+name: proctoring-platform
+
+# Production variant of docker-compose.yml — pulls pre-built images from a registry instead of
+# building locally, keeps every port except the gateway's off the host entirely, sources the
+# DB password from a Docker secret file instead of a plaintext env var, and restarts
+# unconditionally rather than "unless-stopped".
+#
+# Usage:
+#   REGISTRY=your-registry/proctoring-platform TAG=1.4.2 docker compose -f docker-compose.prod.yml up -d
+#
+# (or put REGISTRY/TAG in a .env file next to this one — see .env.prod.example)
+
+x-service-defaults: &service-defaults
+  environment:
+    EUREKA_HOST: eureka-server
+    CONFIG_SERVER_HOST: config-server
+    DB_HOST: postgres
+    DB_USERNAME: postgres
+    DB_PASSWORD_FILE: /run/secrets/postgres_password
+  secrets:
+    - postgres_password
+  depends_on:
+    postgres:
+      condition: service_healthy
+    eureka-server:
+      condition: service_healthy
+    config-server:
+      condition: service_healthy
+  restart: always
+  deploy:
+    resources:
+      limits: { cpus: "1.0", memory: 1G }
+      reservations: { cpus: "0.25", memory: 512M }
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
+    # No host port — reachable only from other containers on this compose network.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: always
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    restart: always
+    # Uncomment to reach the tracing UI directly instead of through a VPN/bastion:
+    # ports:
+    #   - "9411:9411"
+
+  eureka-server:
+    image: ${REGISTRY:?set REGISTRY, e.g. your-registry/proctoring-platform}/eureka-server:${TAG:-latest}
+    # Internal-only: every service reaches it by container name on the compose network.
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: always
+
+  config-server:
+    image: ${REGISTRY:?}/config-server:${TAG:-latest}
+    environment:
+      EUREKA_HOST: eureka-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: always
+
+  api-gateway:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/api-gateway:${TAG:-latest}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+
+  identity-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/identity-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  exam-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/exam-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  attempt-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/attempt-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  proctoring-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/proctoring-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  review-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/review-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  result-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/result-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8086/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  payment-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/payment-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8087/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  notification-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/notification-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8088/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  config-service:
+    <<: *service-defaults
+    image: ${REGISTRY:?}/config-service:${TAG:-latest}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8089/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  pgdata:

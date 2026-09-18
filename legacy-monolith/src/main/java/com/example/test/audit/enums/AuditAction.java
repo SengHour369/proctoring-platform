@@ -1,0 +1,27 @@
+package com.example.test.audit.enums;
+
+/** Auditable operation class. */
+public enum AuditAction {
+    CREATE,
+    UPDATE,
+    DELETE,
+    LOGIN,
+    LOGOUT,
+    PUBLISH,
+    ASSIGN,
+    START_ATTEMPT,
+    SUBMIT_ATTEMPT,
+    GRADE,
+    SCORE_OVERRIDE,
+    TERMINATE_ATTEMPT,
+    VIEW_EVIDENCE,
+    EXPORT,
+    CONFIG_CHANGE,
+    PERMISSION_CHANGE,
+    MODEL_CHANGE,
+    PAYMENT_METHOD_ADDED,
+    PAYMENT_METHOD_REMOVED,
+    PAYMENT_METHOD_SET_DEFAULT,
+    PAYMENT_REFUNDED,
+    PAYMENT_DISPUTED
+}

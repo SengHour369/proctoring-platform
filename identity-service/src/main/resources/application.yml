@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: identity-service
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:8888"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+app:
+  auth:
+    lockout-threshold: 5
+    lock-duration: 15m
+    session-ttl: 30d
+    access-token-ttl: 15m
+    email-verification-token-ttl: 24h
+    password-reset-token-ttl: 1h
+    account-invitation-token-ttl: 7d
+    email-change-token-ttl: 24h
+    max-activity-range-days: 90
+    mfa-challenge-ttl: 5m
+    totp-window-steps: 1
+    # Base64 AES-256 key for encrypting TOTP seeds at rest — replace with a real secret in production.
+    mfa-secret-encryption-key: ${MFA_SECRET_ENCRYPTION_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    # Base64 HMAC key signing access tokens — replace with a real secret in production.
+    jwt-secret: ${JWT_SECRET:dGhpcy1pcy1hLXZlcnktc2VjdXJlLXNlY3JldC1rZXktZm9yLWp3dC10b2tlbg==}

@@ -1,0 +1,55 @@
+// Root build file for the multi-module microservices layout.
+// Each service is its own deployable Spring Boot application; this file only pins the
+// versions and shared conventions every subproject uses so they don't drift apart.
+plugins {
+    id 'org.springframework.boot' version '4.0.6' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+ext {
+    // NOTE: Spring Boot 4.x is very new — double check this Spring Cloud train is the one
+    // actually released to pair with your Boot version before you deploy this for real.
+    // As of writing, Spring Cloud "2025.1.x" is the train tracking Boot 3.4/3.5+; bump this
+    // once the Boot-4-compatible train ships, or pin to whatever your org's BOM mirror serves.
+    springCloudVersion = '2025.1.0'
+}
+
+allprojects {
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}

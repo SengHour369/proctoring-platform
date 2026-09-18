@@ -1,0 +1,174 @@
+name: proctoring-platform
+
+x-service-defaults: &service-defaults
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+  environment:
+    EUREKA_HOST: eureka-server
+    CONFIG_SERVER_HOST: config-server
+    DB_HOST: postgres
+    DB_USERNAME: postgres
+    DB_PASSWORD: postgres
+  depends_on:
+    postgres:
+      condition: service_healthy
+    eureka-server:
+      condition: service_started
+    config-server:
+      condition: service_started
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: eureka-server
+    ports:
+      - "8761:8761"
+    restart: unless-stopped
+
+  config-server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: config-server
+    environment:
+      EUREKA_HOST: eureka-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    restart: unless-stopped
+
+  api-gateway:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  identity-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: identity-service
+    ports:
+      - "8081:8081"
+
+  exam-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: exam-service
+    ports:
+      - "8082:8082"
+
+  attempt-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: attempt-service
+    ports:
+      - "8083:8083"
+
+  proctoring-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: proctoring-service
+    ports:
+      - "8084:8084"
+
+  review-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: review-service
+    ports:
+      - "8085:8085"
+
+  result-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: result-service
+    ports:
+      - "8086:8086"
+
+  payment-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: payment-service
+    ports:
+      - "8087:8087"
+
+  notification-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: notification-service
+    ports:
+      - "8088:8088"
+
+  config-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: config-service
+    ports:
+      - "8089:8089"
+
+volumes:
+  pgdata:

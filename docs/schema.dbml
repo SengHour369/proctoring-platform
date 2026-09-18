@@ -1,0 +1,3372 @@
+// AI Online Exam Proctoring System -- full schema
+// Generated from legacy-monolith/src/main/resources/db/schema-reference.sql +
+// legacy-monolith/src/main/resources/db/schema-foreign-keys.sql -- do not hand-edit, regenerate instead.
+// Docs: https://dbml.dbdiagram.io/docs
+//
+// 80 tables, 164 foreign keys, 78 enums.
+
+//------------------------------------------------------------------//
+// Enums
+//------------------------------------------------------------------//
+
+Enum ActivityVerdict {
+  DETECTED
+  CONFIRMED
+  FALSE_POSITIVE
+  UNDER_REVIEW
+  DISMISSED
+}
+
+Enum ApiClientStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+Enum AssignmentStatus {
+  ASSIGNED
+  NOTIFIED
+  STARTED
+  SUBMITTED
+  EXPIRED
+  CANCELLED
+}
+
+Enum AttemptStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PAUSED
+  SUBMITTED
+  AUTO_SUBMITTED
+  ABANDONED
+  EXPIRED
+  INVALIDATED
+  GRADED
+}
+
+Enum AudioEventType {
+  SPEECH_DETECTED
+  MULTIPLE_VOICES
+  BACKGROUND_NOISE
+  AUDIO_INTERRUPTION
+  PROLONGED_SILENCE
+  SUSPICIOUS_AUDIO
+}
+
+Enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PUBLISH
+  ASSIGN
+  START_ATTEMPT
+  SUBMIT_ATTEMPT
+  GRADE
+  SCORE_OVERRIDE
+  TERMINATE_ATTEMPT
+  VIEW_EVIDENCE
+  EXPORT
+  CONFIG_CHANGE
+  PERMISSION_CHANGE
+  MODEL_CHANGE
+  PAYMENT_METHOD_ADDED
+  PAYMENT_METHOD_REMOVED
+  PAYMENT_METHOD_SET_DEFAULT
+  PAYMENT_REFUNDED
+  PAYMENT_DISPUTED
+}
+
+Enum AuditOutcome {
+  SUCCESS
+  FAILURE
+  DENIED
+}
+
+Enum AutoAction {
+  NONE
+  LOG_ONLY
+  WARN_CANDIDATE
+  PAUSE_ATTEMPT
+  LOCK_SCREEN
+  NOTIFY_PROCTOR
+  TERMINATE_ATTEMPT
+}
+
+Enum BehaviorType {
+  LOOKING_AWAY
+  LEAVING_SEAT
+  FACE_OUT_OF_FRAME
+  TALKING
+  BACKGROUND_VOICE
+  SUSPICIOUS_MOVEMENT
+  RAPID_TYPING_BURST
+  PROLONGED_IDLE
+  SCREEN_OCCLUSION
+  REPEATED_TAB_SWITCH
+}
+
+Enum CalibrationAction {
+  KEEP
+  REVIEW
+  RETIRE
+  REWEIGHT
+}
+
+Enum CalibrationFlag {
+  TOO_EASY
+  TOO_HARD
+  NEGATIVE_DISCRIMINATION
+  MIS_KEY_SUSPECTED
+  NONE
+}
+
+Enum CandidateLiveStatus {
+  ACTIVE
+  IDLE
+  SUSPENDED
+}
+
+Enum CardBrand {
+  VISA
+  MASTERCARD
+  AMEX
+  DISCOVER
+  JCB
+  DINERS_CLUB
+  UNIONPAY
+  MAESTRO
+  ELO
+  OTHER
+}
+
+Enum CheckResult {
+  NOT_RUN
+  PASSED
+  WARNING
+  FAILED
+  SKIPPED
+}
+
+Enum ConnectionStatus {
+  CONNECTED
+  UNSTABLE
+  RECONNECTING
+  DISCONNECTED
+}
+
+Enum CustodyTransition {
+  CAPTURED
+  HASHED
+  UPLOADED
+  VERIFIED
+  ACCESSED
+  EXPORTED
+  PURGED
+}
+
+Enum DetectedObjectClass {
+  MOBILE_PHONE
+  BOOK
+  PAPER_NOTES
+  SECOND_LAPTOP
+  SECOND_MONITOR
+  EARPHONE
+  SMARTWATCH
+  CAMERA
+  ADDITIONAL_PERSON
+  UNKNOWN_OBJECT
+}
+
+Enum DetectionType {
+  FACE
+  OBJECT
+  BEHAVIOR
+  AUDIO
+}
+
+Enum DeviceTrustLevel {
+  UNKNOWN
+  KNOWN
+  SHARED_SUSPECTED
+  SHARED_CONFIRMED
+  BLOCKED
+}
+
+Enum EventSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+Enum EventSource {
+  BROWSER_AGENT
+  AI_ENGINE
+  HUMAN_PROCTOR
+  SYSTEM
+}
+
+Enum EvidenceAccessAction {
+  VIEW
+  STREAM
+  DOWNLOAD
+  EXPORT
+  SHARE_LINK
+  PURGE
+}
+
+Enum EvidenceKind {
+  WEBCAM_SNAPSHOT
+  WEBCAM_CLIP
+  SCREEN_SNAPSHOT
+  SCREEN_CLIP
+  AUDIO_CLIP
+  ID_DOCUMENT
+  ENVIRONMENT_SCAN
+  KEYSTROKE_LOG
+  EVENT_LOG_BUNDLE
+  EXCEL_WORKBOOK_SNAPSHOT
+  EXCEL_FINAL_WORKBOOK
+  EXCEL_EDIT_LOG_BUNDLE
+  EXCEL_DIFF_REPORT
+}
+
+Enum EvidenceUploadStatus {
+  PENDING
+  UPLOADING
+  UPLOADED
+  FAILED
+  QUARANTINED
+  PURGED
+}
+
+Enum ExamStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+Enum ExcelAnswerKind {
+  VALUE
+  FORMULA
+  RANGE
+  CHART
+  PIVOT_TABLE
+  CONDITIONAL_FORMATTING
+  NAMED_RANGE
+  MACRO_OUTPUT
+  MANUAL
+}
+
+Enum ExcelIntegrityStatus {
+  VALID
+  TAMPERED
+  INCONCLUSIVE
+}
+
+Enum ExcelMacroPolicy {
+  OFF
+  SANDBOXED
+  ALLOWED_WHITELIST
+}
+
+Enum ExcelRecalcMode {
+  AUTOMATIC
+  MANUAL
+  ITERATIVE
+}
+
+Enum ExcelRuntimeEngine {
+  LIBREOFFICE
+  ONLYOFFICE
+  SHEETJS_HYPERFORMULA
+  OFFICE_SCRIPTS
+}
+
+Enum ExcelSessionStatus {
+  PENDING
+  ACTIVE
+  SUBMITTED
+  CRASHED
+  RECOVERED
+}
+
+Enum ExcelSheetOperationType {
+  INSERT
+  DELETE
+  RENAME
+  HIDE
+  UNHIDE
+  PROTECT
+  UNPROTECT
+}
+
+Enum ExcelUiActionPolicy {
+  ALLOW
+  BLOCK
+  LOG
+}
+
+Enum ExcelWorkbookFileType {
+  XLSX
+  XLSM
+  XLSB
+  CSV
+  ODS
+}
+
+Enum GazeDirection {
+  ON_SCREEN
+  LEFT
+  RIGHT
+  UP
+  DOWN
+  AWAY
+  UNKNOWN
+}
+
+Enum GradingMode {
+  AUTO
+  MANUAL
+  HYBRID
+}
+
+Enum GradingStatus {
+  NOT_REQUIRED
+  PENDING
+  IN_PROGRESS
+  GRADED
+  REGRADED
+}
+
+Enum GroupType {
+  CLASS
+  COHORT
+  DEPARTMENT
+  PROGRAM
+  CUSTOM
+}
+
+Enum IntegrityStatus {
+  CLEAN
+  FLAGGED
+  UNDER_REVIEW
+  INVALIDATED
+}
+
+Enum InvitationChannel {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+Enum InvitationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+  FAILED
+}
+
+Enum ItemVerdict {
+  VALID
+  FALSE_POSITIVE
+  NEEDS_INVESTIGATION
+  INCONCLUSIVE
+}
+
+Enum LoginOutcome {
+  SUCCESS
+  BAD_CREDENTIALS
+  ACCOUNT_LOCKED
+  ACCOUNT_DISABLED
+  EMAIL_NOT_VERIFIED
+  TOKEN_EXPIRED
+  MFA_REQUIRED
+  MFA_FAILED
+}
+
+Enum MetricType {
+  PRECISION
+  RECALL
+  F1_SCORE
+  ACCURACY
+  FALSE_POSITIVE_RATE
+  FALSE_NEGATIVE_RATE
+  LATENCY_P95_MS
+  THROUGHPUT_FPS
+}
+
+Enum MfaMethod {
+  TOTP
+  SMS
+  EMAIL
+}
+
+Enum ModelPurpose {
+  FACE_DETECTION
+  FACE_VERIFICATION
+  HEAD_POSE
+  GAZE_ESTIMATION
+  OBJECT_DETECTION
+  PERSON_DETECTION
+  SPEECH_DETECTION
+  VOICE_DIARIZATION
+  BEHAVIOR_ANALYSIS
+  RISK_SCORING
+  EXCEL_ANOMALY_DETECTION
+}
+
+Enum ModelVersionStatus {
+  DRAFT
+  CANDIDATE
+  SHADOW
+  ACTIVE
+  DEPRECATED
+  RETIRED
+}
+
+Enum NotificationChannel {
+  EMAIL
+  SMS
+  IN_APP
+  PUSH
+  WEBHOOK
+}
+
+Enum NotificationStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  OPENED
+  FAILED
+  CANCELLED
+}
+
+Enum NotificationType {
+  ACCOUNT_VERIFICATION
+  PASSWORD_RESET
+  EXAM_INVITATION
+  EXAM_REMINDER
+  EXAM_STARTED
+  EXAM_SUBMITTED
+  ATTEMPT_TERMINATED
+  REVIEW_ASSIGNED
+  REVIEW_COMPLETED
+  RESULT_PUBLISHED
+  HIGH_RISK_ALERT
+  SYSTEM_ALERT
+}
+
+Enum PauseRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  AUTO_APPROVED
+}
+
+Enum PaymentCardFunding {
+  CREDIT
+  DEBIT
+  PREPAID
+  CHARGE
+  UNKNOWN
+}
+
+Enum PaymentCardholderVerification {
+  NOT_ATTEMPTED
+  PASSED
+  FAILED
+  UNAVAILABLE
+  UNRECOGNIZED
+}
+
+Enum PaymentCardStatus {
+  ACTIVE
+  EXPIRED
+  PENDING_VERIFICATION
+  SUSPENDED
+  REVOKED
+}
+
+Enum PaymentProvider {
+  STRIPE
+  ADYEN
+  BRAINTREE
+  SQUARE
+  PAYPAL
+  MANUAL
+}
+
+Enum PaymentTransactionStatus {
+  INITIATED
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  SETTLED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  DISPUTED
+  CHARGEBACK
+}
+
+Enum PaymentTransactionType {
+  AUTHORIZATION
+  CAPTURE
+  SALE
+  REFUND
+  VOID
+  CHARGEBACK
+  PAYOUT
+}
+
+Enum ProctorActionType {
+  WARN
+  MESSAGE
+  FLAG
+  PAUSE
+  RESUME
+  TERMINATE
+  ESCALATE
+  NO_ACTION
+}
+
+Enum ProctorShiftOutcome {
+  COMPLETED
+  HANDED_OVER
+  ESCALATED
+  ABANDONED
+}
+
+Enum ProctoringEventType {
+  SESSION_STARTED
+  SESSION_ENDED
+  CONSENT_ACCEPTED
+  IDENTITY_CHECK_PASSED
+  IDENTITY_CHECK_FAILED
+  ENVIRONMENT_SCAN_COMPLETED
+  HEARTBEAT_MISSED
+  NETWORK_DROP
+  CAMERA_BLOCKED
+  CAMERA_DISCONNECTED
+  MICROPHONE_MUTED
+  SCREEN_SHARE_STARTED
+  SCREEN_SHARE_STOPPED
+  FULLSCREEN_ENTERED
+  FULLSCREEN_EXITED
+  TAB_SWITCHED
+  WINDOW_BLURRED
+  WINDOW_FOCUSED
+  BROWSER_HIDDEN
+  BROWSER_VISIBLE
+  COPY_ATTEMPT
+  PASTE_ATTEMPT
+  PRINT_ATTEMPT
+  RIGHT_CLICK_BLOCKED
+  KEYBOARD_SHORTCUT_BLOCKED
+  SUSPICIOUS_KEY_SEQUENCE
+  DEV_TOOLS_OPENED
+  VIRTUAL_MACHINE_SUSPECTED
+  MULTIPLE_DISPLAYS_DETECTED
+  DEVICE_CHANGED
+  NO_FACE_DETECTED
+  MULTIPLE_FACES_DETECTED
+  FACE_MISMATCH
+  GAZE_OFF_SCREEN
+  PROHIBITED_OBJECT_DETECTED
+  VOICE_DETECTED
+  ABNORMAL_BEHAVIOR
+  PROCTOR_MESSAGE
+  PROCTOR_WARNING
+  PROCTOR_MANUAL_FLAG
+  TIME_WARNING_ISSUED
+  ATTEMPT_SUBMITTED
+  ATTEMPT_AUTO_SUBMITTED
+  ATTEMPT_PAUSED
+  ATTEMPT_RESUMED
+  ATTEMPT_TERMINATED
+  EXCEL_CELL_EDIT
+  EXCEL_BULK_PASTE
+  EXCEL_SHEET_OP
+  EXCEL_MACRO_RUN
+  EXCEL_EXTERNAL_LINK
+  EXCEL_ADDIN_LOAD
+  EXCEL_FOCUS_LOST
+  EXCEL_IDLE_ANSWER_CELL
+  EXCEL_ENGINE_ERROR
+  EXCEL_INTEGRITY_FAIL
+}
+
+Enum ProctoringMode {
+  NONE
+  AI_ONLY
+  LIVE_PROCTOR
+  RECORD_AND_REVIEW
+  HYBRID
+}
+
+Enum ProctoringSessionStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  TERMINATED
+  FAILED
+}
+
+Enum ProgrammingLanguage {
+  PYTHON
+  JAVA
+  JAVASCRIPT
+  TYPESCRIPT
+  CPP
+  C
+  CSHARP
+  GO
+  RUST
+  SQL
+}
+
+Enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+Enum QuestionStateType {
+  UNSEEN
+  VIEWED
+  ANSWERED
+  FLAGGED
+  SKIPPED
+  LOCKED
+}
+
+Enum QuestionStatus {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+Enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
+  NUMERIC
+  MATCHING
+  ORDERING
+  FILL_IN_BLANK
+  CODE
+  SPREADSHEET
+}
+
+Enum ReportFormat {
+  PDF
+  HTML
+  JSON
+  ZIP_BUNDLE
+}
+
+Enum ReportStatus {
+  QUEUED
+  GENERATING
+  AVAILABLE
+  FAILED
+  EXPIRED
+}
+
+Enum ResultStatus {
+  PROVISIONAL
+  PENDING_REVIEW
+  WITHHELD
+  FINAL
+  VOID
+}
+
+Enum ResumptionReason {
+  BROWSER_CRASH
+  NETWORK_DROP
+  DEVICE_REBOOT
+  POWER_LOSS
+  PROCTOR_INITIATED
+}
+
+Enum ReviewCaseStatus {
+  OPEN
+  ASSIGNED
+  IN_REVIEW
+  PENDING_INFO
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+Enum ReviewDecisionType {
+  CLEAR
+  WARN_CANDIDATE
+  ADJUST_SCORE
+  INVALIDATE_ATTEMPT
+  GRANT_RETAKE
+  ESCALATE
+  REQUEST_MORE_INFO
+}
+
+Enum ReviewItemKind {
+  PROCTORING_EVENT
+  AI_DETECTION
+  SUSPICIOUS_ACTIVITY
+  EVIDENCE_FILE
+  RISK_FACTOR
+}
+
+Enum ReviewOutcome {
+  CLEARED
+  WARNING_ISSUED
+  SCORE_ADJUSTED
+  ATTEMPT_INVALIDATED
+  RETAKE_GRANTED
+  ESCALATED
+  NO_ACTION
+}
+
+Enum ReviewPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+Enum RiskFactorTrigger {
+  PROCTORING_EVENT
+  AI_DETECTION
+  SUSPICIOUS_ACTIVITY
+  DEVICE_SIGNAL
+  IDENTITY_SIGNAL
+}
+
+Enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+Enum RiskRecommendation {
+  ALLOW
+  MONITOR
+  FLAG_FOR_REVIEW
+  INVALIDATE_ATTEMPT
+  REQUIRE_RETAKE
+}
+
+Enum SettingCategory {
+  GENERAL
+  PROCTORING
+  RISK
+  EXAM
+  STORAGE
+  NOTIFICATION
+  AI
+  SECURITY
+  EXCEL
+}
+
+Enum SettingValueType {
+  STRING
+  INTEGER
+  DECIMAL
+  BOOLEAN
+  JSON
+  DURATION
+  ENUM
+}
+
+Enum ShadowRecommendation {
+  PROMOTE
+  HOLD
+  RETIRE
+}
+
+Enum StreamStatus {
+  UNAVAILABLE
+  ACTIVE
+  DEGRADED
+  INTERRUPTED
+  STOPPED
+}
+
+Enum SuppressionKind {
+  QUIET_HOURS
+  OPT_OUT
+  RATE_LIMIT
+  DUPLICATE_WINDOW
+}
+
+Enum SuspiciousActivityType {
+  REPEATED_LOOKING_AWAY
+  MULTIPLE_FACES
+  PHONE_DETECTED
+  NO_FACE
+  SUSPICIOUS_OBJECT
+  TAB_SWITCHING
+  FULLSCREEN_EXIT
+  AUDIO_EVENT
+  IMPERSONATION_SUSPECTED
+  COMBINED_BEHAVIOR
+}
+
+Enum SystemCheckStatus {
+  IN_PROGRESS
+  PASSED
+  PASSED_WITH_WARNINGS
+  FAILED
+  EXPIRED
+}
+
+Enum SystemCheckType {
+  BROWSER_COMPATIBILITY
+  CAMERA
+  MICROPHONE
+  SPEAKER
+  NETWORK_BANDWIDTH
+  SCREEN_SHARE_PERMISSION
+  FULLSCREEN
+  ENVIRONMENT_SCAN
+  OS_COMPATIBILITY
+  SECOND_SCREEN
+  EXCEL_RUNTIME
+  FORMULA_ENGINE
+  WORKBOOK_LOAD
+}
+
+Enum TestCaseVisibility {
+  SAMPLE
+  HIDDEN
+}
+
+Enum TimingAnomalyType {
+  TOO_FAST_CORRECT
+  TOO_FAST_HIGH_SCORE
+  ZERO_TIME_CORRECT
+  BURST_SUBMIT
+}
+
+Enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  ACCOUNT_INVITATION
+  EMAIL_CHANGE
+}
+
+Enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+Enum VerificationMethod {
+  FACE_MATCH
+  ID_DOCUMENT
+  MANUAL_PROCTOR
+  KNOWLEDGE_CHALLENGE
+  SECOND_FACTOR
+}
+
+Enum VerificationStatus {
+  PENDING
+  IN_PROGRESS
+  PASSED
+  FAILED
+  MANUAL_OVERRIDE
+  EXPIRED
+}
+
+Enum WithholdingReason {
+  RISK_THRESHOLD
+  OPEN_REVIEW_CASE
+  PENDING_MANUAL_GRADING
+  APPEAL_FILED
+  EXTERNAL_HOLD
+}
+
+//------------------------------------------------------------------//
+// Tables
+//------------------------------------------------------------------//
+
+// ---- Authentication & Access ----
+
+Table users {
+  failed_login_count integer [not null]
+  mfa_enabled boolean [not null]
+  created_at timestamptz [not null]
+  email_verified_at timestamptz
+  id bigint [pk, increment]
+  last_login_at timestamptz
+  locale varchar(8)
+  locked_until timestamptz
+  mfa_enrolled_at timestamptz
+  updated_at timestamptz
+  mfa_method MfaMethod
+  public_id uuid [not null, unique]
+  phone_number varchar(32)
+  status UserStatus [not null]
+  external_ref varchar(64) [unique]
+  time_zone varchar(64)
+  full_name varchar(150) [not null]
+  enrolment_photo_path varchar(512)
+  voiceprint_path varchar(512)
+  email varchar(255) [not null, unique]
+  mfa_secret_encrypted varchar(255)
+  password_hash varchar(255) [not null]
+
+  Indexes {
+    status [name: 'ix_users_status']
+  }
+}
+
+Table roles {
+  is_system boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  code varchar(48) [not null, unique]
+  name varchar(100) [not null]
+  description varchar(255)
+}
+
+Table permissions {
+  is_system boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  action varchar(48) [not null]
+  resource varchar(64) [not null]
+  code varchar(100) [not null, unique]
+  description varchar(255)
+
+  Indexes {
+    resource [name: 'ix_permissions_resource']
+  }
+}
+
+Table role_permission {
+  created_at timestamptz [not null]
+  granted_at timestamptz [not null]
+  granted_by_user_id bigint
+  id bigint [pk, increment]
+  permission_id bigint [not null]
+  role_id bigint [not null]
+  updated_at timestamptz
+
+  Indexes {
+    (role_id, permission_id) [unique, name: 'uk_role_permission']
+  }
+}
+
+Table user_role {
+  created_at timestamptz [not null]
+  expires_at timestamptz
+  granted_at timestamptz [not null]
+  granted_by_user_id bigint
+  id bigint [pk, increment]
+  role_id bigint [not null]
+  updated_at timestamptz
+  user_id bigint [not null]
+
+  Indexes {
+    (user_id, role_id) [unique, name: 'uk_user_role']
+  }
+}
+
+Table user_sessions {
+  created_at timestamptz [not null]
+  expires_at timestamptz [not null]
+  id bigint [pk, increment]
+  issued_at timestamptz [not null]
+  last_seen_at timestamptz
+  revoked_at timestamptz
+  updated_at timestamptz
+  user_id bigint [not null]
+  ip_address varchar(45)
+  device_fingerprint varchar(128)
+  refresh_token_hash varchar(128) [not null, unique]
+  revoked_reason varchar(128)
+  user_agent varchar(512)
+
+  Indexes {
+    user_id [name: 'ix_user_sessions_user']
+    expires_at [name: 'ix_user_sessions_expires']
+  }
+}
+
+Table security_tokens {
+  created_at timestamptz [not null]
+  expires_at timestamptz [not null]
+  id bigint [pk, increment]
+  invalidated_at timestamptz
+  issued_at timestamptz [not null]
+  updated_at timestamptz
+  used_at timestamptz
+  user_id bigint [not null]
+  purpose TokenPurpose [not null]
+  redeemed_ip varchar(45)
+  requested_ip varchar(45)
+  token_hash varchar(128) [not null, unique]
+
+  Indexes {
+    (user_id, purpose) [name: 'ix_security_tokens_user']
+    expires_at [name: 'ix_security_tokens_expires']
+  }
+}
+
+Table login_attempts {
+  geo_country varchar(2)
+  attempted_at timestamptz [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  user_id bigint
+  outcome LoginOutcome [not null]
+  ip_address varchar(45)
+  device_fingerprint varchar(128)
+  user_agent varchar(512)
+  email varchar(255) [not null]
+  failure_detail varchar(255)
+
+  Indexes {
+    (email, attempted_at) [name: 'ix_login_attempts_email_time']
+    (ip_address, attempted_at) [name: 'ix_login_attempts_ip_time']
+    user_id [name: 'ix_login_attempts_user']
+  }
+}
+
+Table api_clients {
+  rate_limit_per_minute integer
+  created_at timestamptz [not null]
+  created_by_user_id bigint
+  expires_at timestamptz
+  id bigint [pk, increment]
+  last_used_at timestamptz
+  revoked_at timestamptz
+  secret_rotated_at timestamptz
+  updated_at timestamptz
+  status ApiClientStatus [not null]
+  last_used_ip varchar(45)
+  client_id varchar(64) [not null, unique]
+  client_secret_hash varchar(128) [not null, unique]
+  name varchar(150) [not null]
+  allowed_ip_ranges varchar(500)
+  description varchar(500)
+  allowed_scopes varchar(1000) [not null]
+  revoked_reason varchar(255)
+
+  Indexes {
+    status [name: 'ix_api_clients_status']
+  }
+}
+
+// ---- Payment ----
+
+Table payment_customers {
+  billing_country varchar(2)
+  is_delinquent boolean [not null]
+  preferred_currency varchar(3)
+  created_at timestamptz [not null]
+  default_payment_card_id bigint
+  id bigint [pk, increment]
+  updated_at timestamptz
+  user_id bigint [not null]
+  provider PaymentProvider [not null]
+  public_id uuid [not null]
+  billing_phone varchar(32)
+  billing_postal_code varchar(32)
+  tax_id varchar(64)
+  billing_city varchar(100)
+  billing_state varchar(100)
+  provider_customer_id varchar(128) [not null]
+  billing_name varchar(150)
+  billing_address_line1 varchar(200)
+  billing_address_line2 varchar(200)
+  billing_email varchar(255)
+  metadata jsonb
+
+  Indexes {
+    (user_id, provider) [unique, name: 'uk_payment_customers_user_provider']
+    (provider, provider_customer_id) [unique, name: 'uk_payment_customers_provider_customer']
+    user_id [name: 'ix_payment_customers_user']
+  }
+}
+
+Table payment_cards {
+  billing_country varchar(2)
+  expiry_month integer [not null]
+  expiry_year integer [not null]
+  is_default boolean [not null]
+  issuer_country varchar(2)
+  last4 varchar(4) [not null]
+  three_ds_enrolled boolean [not null]
+  three_ds_supported boolean [not null]
+  bin varchar(8)
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  last_used_at timestamptz
+  payment_customer_id bigint [not null]
+  revoked_at timestamptz
+  updated_at timestamptz
+  user_id bigint [not null]
+  avs_line1_check PaymentCardholderVerification [not null]
+  avs_postal_code_check PaymentCardholderVerification [not null]
+  brand CardBrand [not null]
+  cvv_check PaymentCardholderVerification [not null]
+  funding PaymentCardFunding [not null]
+  provider PaymentProvider [not null]
+  public_id uuid [not null]
+  billing_postal_code varchar(20)
+  status PaymentCardStatus [not null]
+  fingerprint varchar(128)
+  provider_card_token varchar(128)
+  provider_payment_method_id varchar(128) [not null]
+  cardholder_name varchar(150)
+  issuer varchar(150)
+  revoked_reason varchar(255)
+  metadata jsonb
+
+  Indexes {
+    (provider, provider_payment_method_id) [unique, name: 'uk_payment_cards_provider_method']
+    (payment_customer_id, status) [name: 'ix_payment_cards_customer']
+    (user_id, status) [name: 'ix_payment_cards_user']
+    fingerprint [name: 'ix_payment_cards_fingerprint']
+  }
+}
+
+Table payment_transactions {
+  currency varchar(3) [not null]
+  three_ds_authenticated boolean [not null]
+  amount_minor bigint [not null]
+  amount_refunded_minor bigint [not null]
+  captured_at timestamptz
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  initiated_by_user_id bigint
+  parent_transaction_id bigint
+  payment_card_id bigint
+  payment_customer_id bigint [not null]
+  updated_at timestamptz
+  provider PaymentProvider [not null]
+  public_id uuid [not null]
+  type PaymentTransactionType [not null]
+  statement_descriptor varchar(22)
+  status PaymentTransactionStatus [not null]
+  failure_code varchar(64)
+  reference varchar(64)
+  idempotency_key varchar(128)
+  provider_intent_id varchar(128)
+  provider_transaction_id varchar(128) [not null]
+  description varchar(500)
+  failure_message varchar(500)
+  metadata jsonb
+
+  Indexes {
+    (provider, provider_transaction_id) [unique, name: 'uk_payment_transactions_provider_txn']
+    idempotency_key [unique, name: 'uk_payment_transactions_idempotency_key']
+    (payment_customer_id, created_at) [name: 'ix_payment_transactions_customer']
+    (payment_card_id, created_at) [name: 'ix_payment_transactions_card']
+    (status, created_at) [name: 'ix_payment_transactions_status']
+    parent_transaction_id [name: 'ix_payment_transactions_parent']
+    reference [name: 'ix_payment_transactions_reference']
+  }
+}
+
+// ---- Student Groups ----
+
+Table student_groups {
+  is_active boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  owner_user_id bigint
+  parent_group_id bigint
+  updated_at timestamptz
+  group_type GroupType [not null]
+  academic_term varchar(64)
+  code varchar(64) [not null, unique]
+  name varchar(150) [not null]
+  description varchar(500)
+
+  Indexes {
+    group_type [name: 'ix_student_groups_type']
+  }
+}
+
+Table group_memberships {
+  is_active boolean [not null]
+  added_by_user_id bigint
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  joined_at timestamptz [not null]
+  left_at timestamptz
+  student_group_id bigint [not null]
+  updated_at timestamptz
+  user_id bigint [not null]
+
+  Indexes {
+    (student_group_id, user_id) [unique, name: 'uk_group_memberships']
+    user_id [name: 'ix_group_memberships_user']
+  }
+}
+
+// ---- Exam Definition ----
+
+Table exams {
+  allowed_tab_switches integer
+  auto_review_risk_threshold integer
+  auto_terminate_risk_threshold integer
+  block_copy_paste boolean [not null]
+  detect_audio boolean [not null]
+  detect_face boolean [not null]
+  detect_gaze boolean [not null]
+  detect_multiple_faces boolean [not null]
+  detect_objects boolean [not null]
+  detect_tab_switch boolean [not null]
+  duration_minutes integer
+  evidence_retention_days integer
+  excel_autosave_interval_seconds integer
+  excel_external_app_blocked boolean [not null]
+  excel_iterative_calc_max_iterations integer
+  excel_macros_allowed boolean [not null]
+  excel_precision_as_displayed boolean [not null]
+  excel_runtime_required boolean [not null]
+  excel_snapshot_interval_minutes integer
+  excel_volatile_functions_pinned boolean [not null]
+  force_fullscreen boolean [not null]
+  hold_results_for_review boolean [not null]
+  max_attempts integer [not null]
+  monitor_screen boolean [not null]
+  passing_score numeric(9,2)
+  require_environment_scan boolean [not null]
+  require_identity_check boolean [not null]
+  require_microphone boolean [not null]
+  require_screen_share boolean [not null]
+  require_webcam boolean [not null]
+  retain_audio_transcript boolean [not null]
+  show_result_immediately boolean [not null]
+  shuffle_sections boolean [not null]
+  total_points numeric(9,2)
+  version integer [not null]
+  closes_at timestamptz
+  created_at timestamptz [not null]
+  created_by_user_id bigint [not null]
+  id bigint [pk, increment]
+  opens_at timestamptz
+  updated_at timestamptz
+  excel_copy_paste_policy ExcelUiActionPolicy [not null]
+  excel_cut_drag_fill_policy ExcelUiActionPolicy [not null]
+  excel_recalc_mode ExcelRecalcMode [not null]
+  public_id uuid [not null, unique]
+  grading_mode GradingMode [not null]
+  proctoring_mode varchar(32) [not null]
+  status ExamStatus [not null]
+  code varchar(64) [not null, unique]
+  title varchar(200) [not null]
+  description varchar(2000)
+  instructions varchar(4000)
+
+  Indexes {
+    status [name: 'ix_exams_status']
+    (opens_at, closes_at) [name: 'ix_exams_window']
+  }
+}
+
+Table exam_sections {
+  lock_on_exit boolean [not null]
+  questions_to_draw integer
+  section_points numeric(9,2)
+  sequence_no integer [not null]
+  shuffle_questions boolean [not null]
+  time_limit_minutes integer
+  created_at timestamptz [not null]
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  title varchar(150) [not null]
+  description varchar(1000)
+  instructions varchar(2000)
+
+  Indexes {
+    (exam_id, sequence_no) [unique, name: 'uk_exam_sections_order']
+  }
+}
+
+Table exam_questions {
+  negative_points numeric(9,2)
+  points numeric(9,2) [not null]
+  required boolean [not null]
+  sequence_no integer [not null]
+  shuffle_options boolean [not null]
+  created_at timestamptz [not null]
+  exam_section_id bigint [not null]
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  updated_at timestamptz
+
+  Indexes {
+    (exam_section_id, question_id) [unique, name: 'uk_exam_questions_question']
+    (exam_section_id, sequence_no) [unique, name: 'uk_exam_questions_order']
+  }
+}
+
+Table exam_assignments {
+  attempts_allowed integer
+  extra_time_minutes integer
+  assigned_at timestamptz [not null]
+  assigned_by_user_id bigint
+  cancelled_at timestamptz
+  candidate_user_id bigint [not null]
+  created_at timestamptz [not null]
+  due_at timestamptz
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  notified_at timestamptz
+  updated_at timestamptz
+  window_end_at timestamptz
+  window_start_at timestamptz
+  status AssignmentStatus [not null]
+  access_code_hash varchar(128)
+  cancel_reason varchar(255)
+
+  Indexes {
+    (exam_id, candidate_user_id) [unique, name: 'uk_exam_assignments']
+    candidate_user_id [name: 'ix_exam_assignments_candidate']
+    status [name: 'ix_exam_assignments_status']
+  }
+}
+
+Table exam_group_assignments {
+  auto_enroll_new_members boolean [not null]
+  expanded_count integer [not null]
+  assigned_at timestamptz [not null]
+  assigned_by_user_id bigint
+  cancelled_at timestamptz
+  created_at timestamptz [not null]
+  due_at timestamptz
+  exam_id bigint [not null]
+  expanded_at timestamptz
+  id bigint [pk, increment]
+  student_group_id bigint [not null]
+  updated_at timestamptz
+  window_end_at timestamptz
+  window_start_at timestamptz
+
+  Indexes {
+    (exam_id, student_group_id) [unique, name: 'uk_exam_group_assignments']
+    student_group_id [name: 'ix_exam_group_assignments_group']
+  }
+}
+
+Table exam_invitations {
+  is_reminder boolean [not null]
+  sequence_no integer [not null]
+  accepted_at timestamptz
+  created_at timestamptz [not null]
+  delivered_at timestamptz
+  exam_assignment_id bigint [not null]
+  expires_at timestamptz
+  id bigint [pk, increment]
+  opened_at timestamptz
+  sent_at timestamptz
+  updated_at timestamptz
+  channel InvitationChannel [not null]
+  status InvitationStatus [not null]
+  token_hash varchar(128) [unique]
+  failure_reason varchar(500)
+  sent_to varchar(255) [not null]
+
+  Indexes {
+    exam_assignment_id [name: 'ix_exam_invitations_assignment']
+    status [name: 'ix_exam_invitations_status']
+  }
+}
+
+Table exam_prerequisites {
+  is_active boolean [not null]
+  min_score numeric(9,2)
+  created_at timestamptz [not null]
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  required_exam_id bigint
+  updated_at timestamptz
+  course_reference varchar(150)
+  description varchar(500)
+
+  Indexes {
+    exam_id [name: 'ix_exam_prerequisites_exam']
+    required_exam_id [name: 'ix_exam_prerequisites_required_exam']
+  }
+}
+
+Table exam_payment_requirements {
+  active boolean [not null]
+  currency varchar(3) [not null]
+  amount_minor bigint [not null]
+  created_at timestamptz [not null]
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  description varchar(500)
+
+  Indexes {
+    exam_id [name: 'ix_exam_payment_requirements_exam']
+  }
+}
+
+Table exam_payment_charges {
+  currency varchar(3) [not null]
+  amount_minor bigint [not null]
+  candidate_user_id bigint [not null]
+  created_at timestamptz [not null]
+  exam_assignment_id bigint
+  exam_attempt_id bigint
+  exam_id bigint [not null]
+  exam_payment_requirement_id bigint [not null]
+  id bigint [pk, increment]
+  paid_at timestamptz
+  payment_transaction_id bigint
+  refunded_at timestamptz
+  updated_at timestamptz
+  public_id uuid [not null]
+  status PaymentTransactionStatus [not null]
+
+  Indexes {
+    exam_attempt_id [unique, name: 'uk_exam_payment_charges_attempt']
+    (candidate_user_id, status) [name: 'ix_exam_payment_charges_candidate']
+    (exam_id, status) [name: 'ix_exam_payment_charges_exam']
+  }
+}
+
+Table retake_grants {
+  additional_attempts integer [not null]
+  candidate_user_id bigint [not null]
+  consumed_at timestamptz
+  consumed_by_attempt_id bigint
+  created_at timestamptz [not null]
+  exam_assignment_id bigint [not null]
+  expires_at timestamptz
+  granted_at timestamptz [not null]
+  granted_by_user_id bigint [not null]
+  id bigint [pk, increment]
+  review_decision_id bigint [not null]
+  supersedes_grant_id bigint
+  updated_at timestamptz
+  reason varchar(1000) [not null]
+
+  Indexes {
+    exam_assignment_id [name: 'ix_retake_grants_assignment']
+    candidate_user_id [name: 'ix_retake_grants_candidate']
+  }
+}
+
+Table exam_window_overrides {
+  created_at timestamptz [not null]
+  exam_assignment_id bigint [not null]
+  expires_at timestamptz
+  granted_at timestamptz [not null]
+  granted_by_user_id bigint [not null]
+  id bigint [pk, increment]
+  overridden_window_end_at timestamptz [not null]
+  overridden_window_start_at timestamptz [not null]
+  supersedes_override_id bigint
+  updated_at timestamptz
+  reason varchar(1000) [not null]
+  justification_ref varchar(255)
+
+  Indexes {
+    exam_assignment_id [name: 'ix_exam_window_overrides_assignment']
+  }
+}
+
+// ---- Question Bank ----
+
+Table questions {
+  default_points numeric(9,2) [not null]
+  execution_memory_limit_mb integer
+  execution_time_limit_ms integer
+  expected_seconds integer
+  numeric_tolerance numeric(12,6)
+  version integer [not null]
+  workbook_has_external_links boolean [not null]
+  workbook_has_macros boolean [not null]
+  workbook_sheet_count integer
+  created_at timestamptz [not null]
+  created_by_user_id bigint
+  id bigint [pk, increment]
+  parent_question_id bigint
+  question_category_id bigint
+  updated_at timestamptz
+  workbook_size_bytes bigint
+  difficulty QuestionDifficulty [not null]
+  programming_language ProgrammingLanguage
+  status QuestionStatus [not null]
+  workbook_file_type ExcelWorkbookFileType
+  excel_macro_policy ExcelMacroPolicy
+  question_type QuestionType [not null]
+  code varchar(64) [unique]
+  workbook_checksum_sha256 varchar(64)
+  topic varchar(120)
+  media_path varchar(512)
+  workbook_storage_path varchar(512)
+  answer_key varchar(2000)
+  explanation varchar(2000)
+  stem varchar(4000) [not null]
+  starter_code varchar(8000)
+
+  Indexes {
+    question_type [name: 'ix_questions_type']
+    status [name: 'ix_questions_status']
+    topic [name: 'ix_questions_topic']
+    parent_question_id [name: 'ix_questions_parent']
+  }
+}
+
+Table question_options {
+  is_correct boolean [not null]
+  option_weight numeric(9,2)
+  sequence_no integer [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  label varchar(8)
+  question_id bigint [not null]
+  updated_at timestamptz
+  feedback varchar(500)
+  media_path varchar(512)
+  content varchar(2000) [not null]
+  match_key varchar(255)
+
+  Indexes {
+    (question_id, sequence_no) [unique, name: 'uk_question_options_order']
+  }
+}
+
+Table question_categories {
+  depth integer [not null]
+  is_active boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  parent_category_id bigint
+  updated_at timestamptz
+  code varchar(64) [not null, unique]
+  name varchar(150) [not null]
+  description varchar(500)
+  path varchar(512)
+
+  Indexes {
+    parent_category_id [name: 'ix_question_categories_parent']
+  }
+}
+
+Table question_tags {
+  usage_count integer [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  name varchar(64) [not null, unique]
+  description varchar(255)
+}
+
+Table question_tag_link {
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  question_tag_id bigint [not null]
+  updated_at timestamptz
+
+  Indexes {
+    (question_id, question_tag_id) [unique, name: 'uk_question_tag_link']
+    question_tag_id [name: 'ix_question_tag_link_tag']
+  }
+}
+
+Table code_test_cases {
+  points numeric(9,2)
+  sequence_no integer [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  updated_at timestamptz
+  visibility TestCaseVisibility [not null]
+  expected_output varchar(4000) [not null]
+  input_data varchar(4000)
+
+  Indexes {
+    (question_id, sequence_no) [unique, name: 'uk_code_test_cases_order']
+  }
+}
+
+Table excel_cell_bindings {
+  points numeric(9,2)
+  sequence_no integer [not null]
+  tolerance numeric(12,6)
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  updated_at timestamptz
+  cell_ref varchar(20)
+  answer_kind ExcelAnswerKind [not null]
+  range_ref varchar(40)
+  sheet_name varchar(100) [not null]
+  label varchar(150)
+  expected_value varchar(500)
+  expected_formula varchar(1000)
+
+  Indexes {
+    (question_id, sequence_no) [unique, name: 'uk_excel_cell_bindings_order']
+  }
+}
+
+Table question_calibrations {
+  average_time_seconds numeric(8,2)
+  difficulty_index numeric(5,4)
+  discrimination_index numeric(6,4)
+  computed_at timestamptz [not null]
+  correct_count bigint [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  question_id bigint [not null]
+  response_count bigint [not null]
+  updated_at timestamptz
+  window_end_at timestamptz [not null]
+  window_start_at timestamptz [not null]
+  recommended_action CalibrationAction [not null]
+  flagged_reason CalibrationFlag [not null]
+
+  Indexes {
+    (question_id, window_start_at) [name: 'ix_question_calibrations_question']
+  }
+}
+
+// ---- Pre-Exam System Check ----
+
+Table system_checks {
+  attempt_no integer [not null]
+  download_mbps numeric(8,2)
+  failed_check_count integer [not null]
+  latency_ms integer
+  overridden boolean [not null]
+  upload_mbps numeric(8,2)
+  candidate_user_id bigint [not null]
+  completed_at timestamptz
+  created_at timestamptz [not null]
+  exam_attempt_id bigint
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  overridden_by_user_id bigint
+  started_at timestamptz [not null]
+  updated_at timestamptz
+  valid_until timestamptz
+  status SystemCheckStatus [not null]
+  ip_address varchar(45)
+  device_fingerprint varchar(128)
+  override_reason varchar(500)
+  user_agent varchar(512)
+
+  Indexes {
+    (candidate_user_id, started_at) [name: 'ix_system_checks_candidate']
+    exam_id [name: 'ix_system_checks_exam']
+    exam_attempt_id [name: 'ix_system_checks_attempt']
+  }
+}
+
+Table system_check_items {
+  is_required boolean [not null]
+  retry_count integer [not null]
+  checked_at timestamptz
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  system_check_id bigint [not null]
+  updated_at timestamptz
+  result CheckResult [not null]
+  check_type SystemCheckType [not null]
+  message varchar(500)
+  measurement jsonb
+
+  Indexes {
+    (system_check_id, check_type) [unique, name: 'uk_system_check_items']
+  }
+}
+
+// ---- Identity Verification ----
+
+Table identity_verifications {
+  liveness_score numeric(5,4)
+  match_score numeric(5,4)
+  match_threshold numeric(5,4)
+  sequence_no integer [not null]
+  candidate_user_id bigint [not null]
+  captured_evidence_id bigint
+  created_at timestamptz [not null]
+  document_last4 varchar(8)
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  proctoring_session_id bigint
+  updated_at timestamptz
+  verified_at timestamptz
+  verified_by_user_id bigint
+  status VerificationStatus [not null]
+  method VerificationMethod [not null]
+  document_type varchar(48)
+  failure_reason varchar(500)
+  override_reason varchar(500)
+  reference_photo_path varchar(512)
+
+  Indexes {
+    exam_attempt_id [name: 'ix_identity_verifications_attempt']
+    candidate_user_id [name: 'ix_identity_verifications_candidate']
+    status [name: 'ix_identity_verifications_status']
+  }
+}
+
+// ---- Consent & Privacy ----
+
+Table privacy_notices {
+  is_active boolean [not null]
+  created_at timestamptz [not null]
+  effective_from timestamptz [not null]
+  effective_to timestamptz
+  id bigint [pk, increment]
+  locale varchar(8) [not null]
+  updated_at timestamptz
+  version varchar(32) [not null]
+  notice_code varchar(64) [not null]
+  body_markdown varchar(8000) [not null]
+
+  Indexes {
+    (notice_code, version, locale) [unique, name: 'uk_privacy_notices_version']
+  }
+}
+
+Table consent_records {
+  consented_at timestamptz [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  privacy_notice_id bigint [not null]
+  updated_at timestamptz
+  withdrawn_at timestamptz
+  notice_version varchar(32) [not null]
+  ip_address varchar(45)
+  user_agent varchar(512)
+
+  Indexes {
+    exam_attempt_id [name: 'ix_consent_records_attempt']
+  }
+}
+
+// ---- Exam Session & Attempts ----
+
+Table exam_attempts {
+  attempt_no integer [not null]
+  exam_version integer [not null]
+  candidate_user_id bigint [not null]
+  created_at timestamptz [not null]
+  current_section_id bigint
+  exam_assignment_id bigint
+  exam_id bigint [not null]
+  expires_at timestamptz
+  id bigint [pk, increment]
+  invalidated_at timestamptz
+  last_activity_at timestamptz
+  last_heartbeat_at timestamptz
+  paused_seconds bigint [not null]
+  started_at timestamptz
+  submitted_at timestamptz
+  time_spent_seconds bigint [not null]
+  updated_at timestamptz
+  public_id uuid [not null, unique]
+  status AttemptStatus [not null]
+  ip_address varchar(45)
+  session_token_hash varchar(128)
+  invalidation_reason varchar(500)
+  user_agent varchar(512)
+
+  Indexes {
+    (exam_id, candidate_user_id, attempt_no) [unique, name: 'uk_exam_attempts_no']
+    candidate_user_id [name: 'ix_exam_attempts_candidate']
+    status [name: 'ix_exam_attempts_status']
+    started_at [name: 'ix_exam_attempts_started']
+  }
+}
+
+Table attempt_answers {
+  flagged_by_candidate boolean [not null]
+  is_correct boolean
+  points_awarded numeric(9,2)
+  response_numeric numeric(18,6)
+  revision_count integer [not null]
+  time_spent_seconds integer [not null]
+  answered_at timestamptz
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  exam_question_id bigint [not null]
+  graded_at timestamptz
+  graded_by_user_id bigint
+  id bigint [pk, increment]
+  updated_at timestamptz
+  grading_status GradingStatus [not null]
+  attachment_path varchar(512)
+  grader_comment varchar(2000)
+  response_text varchar(8000)
+
+  Indexes {
+    (exam_attempt_id, exam_question_id) [unique, name: 'uk_attempt_answers']
+  }
+}
+
+Table attempt_answer_options {
+  sequence_no integer
+  attempt_answer_id bigint [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  question_option_id bigint [not null]
+  updated_at timestamptz
+
+  Indexes {
+    (attempt_answer_id, question_option_id) [unique, name: 'uk_attempt_answer_options']
+    question_option_id [name: 'ix_attempt_answer_options_option']
+  }
+}
+
+Table answer_revisions {
+  auto_saved boolean [not null]
+  response_numeric numeric(18,6)
+  revision_no integer [not null]
+  attempt_answer_id bigint [not null]
+  client_timestamp timestamptz
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  saved_at timestamptz [not null]
+  updated_at timestamptz
+  ip_address varchar(45)
+  response_text varchar(8000)
+  selected_option_ids jsonb
+
+  Indexes {
+    (attempt_answer_id, revision_no) [unique, name: 'uk_answer_revisions']
+    (attempt_answer_id, saved_at) [name: 'ix_answer_revisions_saved']
+  }
+}
+
+Table question_states {
+  display_order integer [not null]
+  time_on_question_seconds integer [not null]
+  view_count integer [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  exam_question_id bigint [not null]
+  first_viewed_at timestamptz
+  id bigint [pk, increment]
+  last_viewed_at timestamptz
+  locked_at timestamptz
+  updated_at timestamptz
+  state QuestionStateType [not null]
+  option_order varchar(255)
+
+  Indexes {
+    (exam_attempt_id, exam_question_id) [unique, name: 'uk_question_states']
+  }
+}
+
+Table attempt_pause_requests {
+  created_at timestamptz [not null]
+  decided_at timestamptz
+  decided_by_user_id bigint
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  requested_at timestamptz [not null]
+  requested_by_user_id bigint
+  resumed_at timestamptz
+  updated_at timestamptz
+  status PauseRequestStatus [not null]
+  decision_note varchar(500)
+  reason varchar(500)
+
+  Indexes {
+    exam_attempt_id [name: 'ix_attempt_pause_requests_attempt']
+    status [name: 'ix_attempt_pause_requests_status']
+  }
+}
+
+Table code_execution_results {
+  memory_kb integer
+  passed boolean [not null]
+  runtime_ms integer
+  attempt_answer_id bigint [not null]
+  code_test_case_id bigint [not null]
+  created_at timestamptz [not null]
+  executed_at timestamptz
+  id bigint [pk, increment]
+  updated_at timestamptz
+  error_message varchar(2000)
+  actual_output varchar(4000)
+
+  Indexes {
+    (attempt_answer_id, code_test_case_id) [unique, name: 'uk_code_execution_results']
+  }
+}
+
+Table excel_grade_results {
+  is_correct boolean [not null]
+  points_awarded numeric(9,2)
+  attempt_answer_id bigint [not null]
+  created_at timestamptz [not null]
+  excel_cell_binding_id bigint [not null]
+  graded_at timestamptz
+  id bigint [pk, increment]
+  updated_at timestamptz
+  grader_type ExcelAnswerKind [not null]
+  graded_value varchar(500)
+  graded_formula varchar(1000)
+  grader_note varchar(1000)
+
+  Indexes {
+    (attempt_answer_id, excel_cell_binding_id) [unique, name: 'uk_excel_grade_results']
+  }
+}
+
+Table attempt_resumptions {
+  auto_approved boolean [not null]
+  approved_by_user_id bigint
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  resumed_at timestamptz [not null]
+  risk_event_id bigint
+  time_away_seconds bigint [not null]
+  updated_at timestamptz
+  reason ResumptionReason [not null]
+  new_session_token_hash varchar(128)
+  previous_session_token_hash varchar(128)
+
+  Indexes {
+    exam_attempt_id [name: 'ix_attempt_resumptions_attempt']
+  }
+}
+
+Table question_form_fingerprints {
+  collision_count integer [not null]
+  question_count integer [not null]
+  section_count integer [not null]
+  computed_at timestamptz [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null, unique]
+  exam_id bigint [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  form_hash varchar(64) [not null]
+  collision_attempt_ids jsonb
+
+  Indexes {
+    (exam_id, form_hash) [name: 'ix_question_form_fingerprints_hash']
+  }
+}
+
+Table answer_timing_anomalies {
+  actual_seconds integer [not null]
+  answer_correct boolean [not null]
+  expected_seconds integer
+  ratio numeric(8,4)
+  revision_count integer [not null]
+  attempt_answer_id bigint [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  exam_question_id bigint [not null]
+  flagged_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  anomaly_type TimingAnomalyType [not null]
+
+  Indexes {
+    exam_attempt_id [name: 'ix_answer_timing_anomalies_attempt']
+    attempt_answer_id [name: 'ix_answer_timing_anomalies_answer']
+  }
+}
+
+// ---- Excel Runtime ----
+
+Table excel_sessions {
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null, unique]
+  id bigint [pk, increment]
+  proctoring_session_id bigint
+  started_at timestamptz
+  submitted_at timestamptz
+  updated_at timestamptz
+  integrity_status ExcelIntegrityStatus
+  public_id uuid [not null, unique]
+  status ExcelSessionStatus [not null]
+  engine_used ExcelRuntimeEngine
+  final_checksum_sha256 varchar(64)
+  sandbox_container_id varchar(128)
+
+  Indexes {
+    proctoring_session_id [name: 'ix_excel_sessions_proctoring_session']
+  }
+}
+
+Table excel_cell_edits {
+  sequence_no integer [not null]
+  created_at timestamptz [not null]
+  edited_at timestamptz [not null]
+  excel_session_id bigint [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  cell_ref varchar(20) [not null]
+  sheet_name varchar(100) [not null]
+  new_formula varchar(1000)
+  old_formula varchar(1000)
+  new_value varchar(2000)
+  old_value varchar(2000)
+
+  Indexes {
+    (excel_session_id, sequence_no) [unique, name: 'uk_excel_cell_edits_order']
+    (excel_session_id, edited_at) [name: 'ix_excel_cell_edits_session_time']
+  }
+}
+
+Table excel_sheet_operations {
+  created_at timestamptz [not null]
+  excel_session_id bigint [not null]
+  id bigint [pk, increment]
+  occurred_at timestamptz [not null]
+  updated_at timestamptz
+  operation_type ExcelSheetOperationType [not null]
+  sheet_name varchar(100) [not null]
+  detail varchar(500)
+
+  Indexes {
+    (excel_session_id, occurred_at) [name: 'ix_excel_sheet_operations_session_time']
+  }
+}
+
+Table excel_macro_executions {
+  allowed boolean [not null]
+  duration_ms integer
+  exit_code integer
+  created_at timestamptz [not null]
+  excel_session_id bigint [not null]
+  executed_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  macro_name varchar(150) [not null]
+  input_summary varchar(1000)
+  output_summary varchar(1000)
+
+  Indexes {
+    (excel_session_id, executed_at) [name: 'ix_excel_macro_executions_session_time']
+  }
+}
+
+// ---- Proctoring Sessions ----
+
+Table proctoring_sessions {
+  critical_event_count integer [not null]
+  event_count integer [not null]
+  heartbeat_miss_count integer [not null]
+  identity_verified boolean [not null]
+  warning_issued_count integer [not null]
+  assigned_proctor_user_id bigint
+  consent_accepted_at timestamptz
+  created_at timestamptz [not null]
+  ended_at timestamptz
+  environment_scan_completed_at timestamptz
+  exam_attempt_id bigint [not null, unique]
+  id bigint [pk, increment]
+  identity_verified_at timestamptz
+  identity_verified_by_user_id bigint
+  last_heartbeat_at timestamptz
+  started_at timestamptz
+  terminated_at timestamptz
+  updated_at timestamptz
+  public_id uuid [not null, unique]
+  mode ProctoringMode [not null]
+  status ProctoringSessionStatus [not null]
+  termination_reason varchar(500)
+
+  Indexes {
+    status [name: 'ix_proctoring_sessions_status']
+    assigned_proctor_user_id [name: 'ix_proctoring_sessions_proctor']
+  }
+}
+
+Table proctoring_events {
+  acknowledged_at timestamptz
+  created_at timestamptz [not null]
+  device_session_id bigint
+  duration_ms bigint
+  id bigint [pk, increment]
+  occurred_at timestamptz [not null]
+  offset_ms bigint
+  proctoring_session_id bigint [not null]
+  received_at timestamptz [not null]
+  updated_at timestamptz
+  severity EventSeverity [not null]
+  source EventSource [not null]
+  auto_action AutoAction [not null]
+  event_type ProctoringEventType [not null]
+  idempotency_key varchar(64)
+  description varchar(500)
+  payload jsonb
+
+  Indexes {
+    (proctoring_session_id, occurred_at) [name: 'ix_proctoring_events_session_time']
+    event_type [name: 'ix_proctoring_events_type']
+    severity [name: 'ix_proctoring_events_severity']
+  }
+}
+
+Table device_sessions {
+  geo_country varchar(2)
+  is_primary boolean [not null]
+  monitor_count integer
+  timezone_offset_minutes integer
+  virtual_machine_suspected boolean [not null]
+  vpn_suspected boolean [not null]
+  connected_at timestamptz [not null]
+  created_at timestamptz [not null]
+  disconnected_at timestamptz
+  id bigint [pk, increment]
+  proctoring_session_id bigint [not null]
+  updated_at timestamptz
+  browser_version varchar(32)
+  os_version varchar(32)
+  screen_resolution varchar(32)
+  ip_address varchar(45)
+  browser varchar(64)
+  operating_system varchar(64)
+  geo_city varchar(100)
+  device_label varchar(120)
+  device_fingerprint varchar(128) [not null]
+  camera_label varchar(150)
+  microphone_label varchar(150)
+  user_agent varchar(512)
+
+  Indexes {
+    proctoring_session_id [name: 'ix_device_sessions_session']
+    device_fingerprint [name: 'ix_device_sessions_fingerprint']
+  }
+}
+
+Table evidence_files {
+  height_px integer
+  width_px integer
+  captured_at timestamptz [not null]
+  created_at timestamptz [not null]
+  duration_ms bigint
+  id bigint [pk, increment]
+  offset_ms bigint
+  proctoring_event_id bigint
+  proctoring_session_id bigint [not null]
+  purged_at timestamptz
+  retention_until timestamptz
+  size_bytes bigint
+  updated_at timestamptz
+  uploaded_at timestamptz
+  public_id uuid [not null, unique]
+  upload_status EvidenceUploadStatus [not null]
+  kind EvidenceKind [not null]
+  checksum_sha256 varchar(64)
+  content_type varchar(100)
+  storage_path varchar(512) [not null]
+  file_name varchar(255)
+
+  Indexes {
+    (proctoring_session_id, captured_at) [name: 'ix_evidence_files_session']
+    proctoring_event_id [name: 'ix_evidence_files_event']
+    retention_until [name: 'ix_evidence_files_retention']
+  }
+}
+
+Table evidence_access_logs {
+  was_granted boolean [not null]
+  accessed_at timestamptz [not null]
+  actor_user_id bigint [not null]
+  created_at timestamptz [not null]
+  evidence_file_id bigint [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  action EvidenceAccessAction [not null]
+  ip_address varchar(45)
+  context_reference varchar(64)
+  purpose varchar(500)
+  user_agent varchar(512)
+  denied_reason varchar(255)
+
+  Indexes {
+    (evidence_file_id, accessed_at) [name: 'ix_evidence_access_file']
+    (actor_user_id, accessed_at) [name: 'ix_evidence_access_actor']
+  }
+}
+
+Table live_session_status {
+  answered_count integer [not null]
+  current_question_no integer
+  is_fullscreen boolean [not null]
+  is_window_focused boolean [not null]
+  network_latency_ms integer
+  open_alert_count integer [not null]
+  remaining_seconds integer
+  risk_score numeric(5,2)
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  last_event_at timestamptz
+  last_heartbeat_at timestamptz
+  proctoring_session_id bigint [not null, unique]
+  updated_at timestamptz
+  camera_status StreamStatus [not null]
+  candidate_status CandidateLiveStatus [not null]
+  connection_status ConnectionStatus [not null]
+  microphone_status StreamStatus [not null]
+  risk_level RiskLevel
+  screen_status StreamStatus [not null]
+  updated_by_node varchar(64)
+  websocket_id varchar(128)
+
+  Indexes {
+    risk_level [name: 'ix_live_session_status_risk']
+    connection_status [name: 'ix_live_session_status_conn']
+    candidate_status [name: 'ix_live_session_status_candidate']
+  }
+}
+
+Table device_trust_records {
+  distinct_candidate_count integer [not null]
+  sighting_count integer [not null]
+  created_at timestamptz [not null]
+  exam_id bigint [not null]
+  first_seen_at timestamptz [not null]
+  flagged_at timestamptz
+  id bigint [pk, increment]
+  last_seen_at timestamptz [not null]
+  updated_at timestamptz
+  trust_level DeviceTrustLevel [not null]
+  device_fingerprint varchar(128) [not null]
+  flagged_reason varchar(500)
+  distinct_candidate_ids jsonb
+
+  Indexes {
+    (device_fingerprint, exam_id) [unique, name: 'uk_device_trust_records']
+    trust_level [name: 'ix_device_trust_records_level']
+  }
+}
+
+Table evidence_custody_records {
+  sequence_no integer [not null]
+  actor_api_client_id bigint
+  actor_user_id bigint
+  created_at timestamptz [not null]
+  evidence_file_id bigint [not null]
+  id bigint [pk, increment]
+  occurred_at timestamptz [not null]
+  updated_at timestamptz
+  transition CustodyTransition [not null]
+  checksum_after varchar(64)
+  checksum_before varchar(64)
+  note varchar(500)
+  storage_path_after varchar(512)
+  storage_path_before varchar(512)
+
+  Indexes {
+    (evidence_file_id, sequence_no) [unique, name: 'uk_evidence_custody_records']
+    evidence_file_id [name: 'ix_evidence_custody_records_file']
+  }
+}
+
+Table proctor_shifts {
+  events_during_shift integer [not null]
+  flags_raised_during_shift integer [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  proctor_user_id bigint [not null]
+  proctoring_session_id bigint [not null]
+  shift_end_at timestamptz
+  shift_start_at timestamptz [not null]
+  updated_at timestamptz
+  outcome ProctorShiftOutcome
+  handover_note varchar(1000)
+
+  Indexes {
+    proctoring_session_id [name: 'ix_proctor_shifts_session']
+    (proctoring_session_id, shift_end_at) [name: 'ix_proctor_shifts_open']
+  }
+}
+
+Table proctor_actions {
+  candidate_notified boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  occurred_at timestamptz [not null]
+  proctor_shift_id bigint
+  proctor_user_id bigint [not null]
+  proctoring_event_id bigint
+  proctoring_session_id bigint [not null]
+  supervisor_approval_user_id bigint
+  supervisor_approved_at timestamptz
+  updated_at timestamptz
+  action_type ProctorActionType [not null]
+  reason varchar(500)
+
+  Indexes {
+    proctoring_session_id [name: 'ix_proctor_actions_session']
+    proctor_shift_id [name: 'ix_proctor_actions_shift']
+  }
+}
+
+// ---- AI Detection ----
+
+Table ai_detections {
+  confidence numeric(5,4) [not null]
+  is_anomaly boolean [not null]
+  processing_time_ms integer
+  ai_model_version_id bigint
+  captured_at timestamptz [not null]
+  created_at timestamptz [not null]
+  evidence_file_id bigint
+  id bigint [pk, increment]
+  offset_ms bigint
+  processed_at timestamptz
+  proctoring_event_id bigint
+  proctoring_session_id bigint [not null]
+  updated_at timestamptz
+  detection_type DetectionType [not null]
+  model_version varchar(32) [not null]
+  model_name varchar(100) [not null]
+  raw_output jsonb
+
+  Indexes {
+    (proctoring_session_id, captured_at) [name: 'ix_ai_detections_session_time']
+    proctoring_event_id [name: 'ix_ai_detections_event']
+    is_anomaly [name: 'ix_ai_detections_anomaly']
+  }
+}
+
+Table face_detections {
+  box_height float8
+  box_width float8
+  box_x float8
+  box_y float8
+  eyes_closed boolean
+  face_count integer [not null]
+  head_pitch numeric(6,2)
+  head_roll numeric(6,2)
+  head_yaw numeric(6,2)
+  identity_match_score numeric(5,4)
+  identity_matched boolean
+  liveness_score numeric(5,4)
+  mask_or_occlusion_detected boolean [not null]
+  spoof_suspected boolean [not null]
+  ai_detection_id bigint [not null, unique]
+  created_at timestamptz [not null]
+  gaze_off_screen_ms bigint
+  id bigint [pk, increment]
+  updated_at timestamptz
+  gaze_direction GazeDirection
+}
+
+Table object_detections {
+  box_height float8
+  box_width float8
+  box_x float8
+  box_y float8
+  is_prohibited boolean [not null]
+  object_count integer [not null]
+  persisted_frames integer
+  proximity_score numeric(5,4)
+  ai_detection_id bigint [not null, unique]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  object_class DetectedObjectClass [not null]
+  object_label varchar(100)
+
+  Indexes {
+    object_class [name: 'ix_object_detections_class']
+  }
+}
+
+Table behavior_detections {
+  audio_related boolean [not null]
+  baseline_deviation numeric(8,4)
+  intensity_score numeric(5,4)
+  occurrence_count integer [not null]
+  ai_detection_id bigint [not null, unique]
+  created_at timestamptz [not null]
+  duration_ms bigint
+  id bigint [pk, increment]
+  updated_at timestamptz
+  window_end_at timestamptz [not null]
+  window_start_at timestamptz [not null]
+  behavior_type BehaviorType [not null]
+
+  Indexes {
+    behavior_type [name: 'ix_behavior_detections_type']
+  }
+}
+
+Table audio_detections {
+  average_db numeric(6,2)
+  peak_db numeric(6,2)
+  signal_to_noise_ratio numeric(6,2)
+  speaker_count integer
+  speech_ratio numeric(5,4)
+  unknown_speaker boolean [not null]
+  ai_detection_id bigint [not null, unique]
+  created_at timestamptz [not null]
+  duration_ms bigint
+  id bigint [pk, increment]
+  language_code varchar(8)
+  updated_at timestamptz
+  window_end_at timestamptz [not null]
+  window_start_at timestamptz [not null]
+  audio_event_type AudioEventType [not null]
+  transcript_excerpt varchar(1000)
+
+  Indexes {
+    audio_event_type [name: 'ix_audio_detections_type']
+  }
+}
+
+Table suspicious_activities {
+  confidence numeric(5,4) [not null]
+  detection_count integer [not null]
+  event_count integer [not null]
+  occurrence_count integer [not null]
+  adjudicated_at timestamptz
+  adjudicated_by_user_id bigint
+  created_at timestamptz [not null]
+  duration_ms bigint
+  exam_attempt_id bigint [not null]
+  first_seen_at timestamptz [not null]
+  id bigint [pk, increment]
+  last_seen_at timestamptz [not null]
+  primary_detection_id bigint
+  proctoring_session_id bigint [not null]
+  updated_at timestamptz
+  severity EventSeverity [not null]
+  verdict ActivityVerdict [not null]
+  activity_type SuspiciousActivityType [not null]
+  rule_code varchar(64)
+  description varchar(500)
+  adjudication_note varchar(1000)
+  contributing_signals jsonb
+
+  Indexes {
+    (proctoring_session_id, first_seen_at) [name: 'ix_suspicious_activities_session']
+    exam_attempt_id [name: 'ix_suspicious_activities_attempt']
+    activity_type [name: 'ix_suspicious_activities_type']
+    verdict [name: 'ix_suspicious_activities_verdict']
+  }
+}
+
+// ---- Risk Engine ----
+
+Table risk_assessments {
+  auto_action_applied boolean [not null]
+  behavior_anomaly_score numeric(5,2)
+  critical_event_count integer [not null]
+  environment_score numeric(5,2)
+  face_anomaly_score numeric(5,2)
+  identity_score numeric(5,2)
+  is_latest boolean [not null]
+  object_anomaly_score numeric(5,2)
+  risk_score numeric(5,2) [not null]
+  total_event_count integer [not null]
+  version integer [not null]
+  computed_at timestamptz [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  proctoring_session_id bigint
+  updated_at timestamptz
+  risk_level RiskLevel [not null]
+  recommendation RiskRecommendation [not null]
+  scoring_model_version varchar(32) [not null]
+  threshold_version varchar(32)
+  scoring_model varchar(100) [not null]
+  recompute_reason varchar(255)
+
+  Indexes {
+    (exam_attempt_id, version) [unique, name: 'uk_risk_assessments_version']
+    (exam_attempt_id, is_latest) [name: 'ix_risk_assessments_latest']
+    risk_level [name: 'ix_risk_assessments_level']
+    risk_score [name: 'ix_risk_assessments_score']
+  }
+}
+
+Table risk_events {
+  contributed_points numeric(6,2) [not null]
+  occurrence_count integer [not null]
+  weight numeric(6,3) [not null]
+  ai_detection_id bigint
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  occurred_at timestamptz
+  proctoring_event_id bigint
+  risk_assessment_id bigint [not null]
+  updated_at timestamptz
+  severity EventSeverity [not null]
+  factor_code varchar(64) [not null]
+  factor_label varchar(150)
+  note varchar(500)
+
+  Indexes {
+    risk_assessment_id [name: 'ix_risk_events_assessment']
+    factor_code [name: 'ix_risk_events_factor']
+  }
+}
+
+// ---- Review System ----
+
+Table review_cases {
+  candidate_notified boolean [not null]
+  sla_breached boolean [not null]
+  assigned_at timestamptz
+  assigned_reviewer_user_id bigint
+  closed_at timestamptz
+  created_at timestamptz [not null]
+  due_at timestamptz
+  exam_attempt_id bigint [not null]
+  id bigint [pk, increment]
+  opened_at timestamptz [not null]
+  opened_by_user_id bigint
+  risk_assessment_id bigint
+  updated_at timestamptz
+  priority ReviewPriority [not null]
+  status ReviewCaseStatus [not null]
+  case_number varchar(32) [not null, unique]
+  final_outcome ReviewOutcome
+  open_reason varchar(500) [not null]
+  summary varchar(2000)
+
+  Indexes {
+    exam_attempt_id [name: 'ix_review_cases_attempt']
+    status [name: 'ix_review_cases_status']
+    assigned_reviewer_user_id [name: 'ix_review_cases_reviewer']
+    due_at [name: 'ix_review_cases_due']
+  }
+}
+
+Table review_decisions {
+  is_final boolean [not null]
+  score_adjustment numeric(9,2)
+  sequence_no integer [not null]
+  created_at timestamptz [not null]
+  decided_at timestamptz [not null]
+  id bigint [pk, increment]
+  review_case_id bigint [not null]
+  reviewer_user_id bigint [not null]
+  supersedes_decision_id bigint
+  updated_at timestamptz
+  decision_type ReviewDecisionType [not null]
+  evidence_refs varchar(1000)
+  rationale varchar(2000) [not null]
+
+  Indexes {
+    (review_case_id, sequence_no) [unique, name: 'uk_review_decisions_order']
+  }
+}
+
+Table review_findings {
+  weight_disputed boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  item_id bigint [not null]
+  review_case_id bigint [not null]
+  reviewed_at timestamptz [not null]
+  reviewer_user_id bigint [not null]
+  updated_at timestamptz
+  verdict ItemVerdict [not null]
+  item_kind ReviewItemKind [not null]
+  comment varchar(1000)
+
+  Indexes {
+    (review_case_id, item_kind, item_id) [unique, name: 'uk_review_findings_item']
+    review_case_id [name: 'ix_review_findings_case']
+    verdict [name: 'ix_review_findings_verdict']
+  }
+}
+
+Table review_notes {
+  candidate_visible boolean [not null]
+  author_user_id bigint [not null]
+  created_at timestamptz [not null]
+  edited_at timestamptz
+  id bigint [pk, increment]
+  review_case_id bigint [not null]
+  updated_at timestamptz
+  attachment_path varchar(512)
+  body varchar(4000) [not null]
+
+  Indexes {
+    (review_case_id, created_at) [name: 'ix_review_notes_case']
+  }
+}
+
+// ---- Exam Results ----
+
+Table exam_results {
+  correct_count integer [not null]
+  final_score numeric(9,2) [not null]
+  incorrect_count integer [not null]
+  max_score numeric(9,2) [not null]
+  passed boolean
+  pending_manual_count integer [not null]
+  percentage numeric(5,2)
+  raw_score numeric(9,2) [not null]
+  released_to_candidate boolean [not null]
+  risk_score numeric(5,2)
+  score_adjustment numeric(9,2)
+  unanswered_count integer [not null]
+  candidate_user_id bigint [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null, unique]
+  exam_id bigint [not null]
+  grade varchar(8)
+  graded_at timestamptz
+  graded_by_user_id bigint
+  id bigint [pk, increment]
+  published_at timestamptz
+  review_case_id bigint
+  time_spent_seconds bigint
+  updated_at timestamptz
+  grading_mode GradingMode [not null]
+  risk_level RiskLevel
+  integrity_status IntegrityStatus [not null]
+  status ResultStatus [not null]
+  certificate_serial varchar(64)
+
+  Indexes {
+    exam_id [name: 'ix_exam_results_exam']
+    candidate_user_id [name: 'ix_exam_results_candidate']
+    status [name: 'ix_exam_results_status']
+    integrity_status [name: 'ix_exam_results_integrity']
+  }
+}
+
+Table result_details {
+  answered boolean [not null]
+  is_correct boolean
+  points_awarded numeric(9,2) [not null]
+  points_possible numeric(9,2) [not null]
+  sequence_no integer [not null]
+  time_spent_seconds integer
+  attempt_answer_id bigint
+  created_at timestamptz [not null]
+  exam_question_id bigint [not null]
+  exam_result_id bigint [not null]
+  exam_section_id bigint
+  id bigint [pk, increment]
+  updated_at timestamptz
+  scoring_note varchar(500)
+
+  Indexes {
+    (exam_result_id, exam_question_id) [unique, name: 'uk_result_details_question']
+  }
+}
+
+Table result_withholdings {
+  created_at timestamptz [not null]
+  exam_result_id bigint [not null]
+  id bigint [pk, increment]
+  released_at timestamptz
+  released_by_user_id bigint
+  review_case_id bigint
+  risk_assessment_id bigint
+  updated_at timestamptz
+  withheld_at timestamptz [not null]
+  withheld_by_user_id bigint
+  reason WithholdingReason [not null]
+  threshold_version varchar(32)
+  release_reason varchar(1000)
+
+  Indexes {
+    (exam_result_id, released_at) [name: 'ix_result_withholdings_result']
+  }
+}
+
+// ---- Proctoring Reports ----
+
+Table proctoring_reports {
+  includes_evidence boolean [not null]
+  risk_score numeric(5,2)
+  version integer [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  expires_at timestamptz
+  generated_at timestamptz
+  id bigint [pk, increment]
+  proctoring_session_id bigint
+  requested_at timestamptz [not null]
+  requested_by_user_id bigint
+  review_case_id bigint
+  risk_assessment_id bigint
+  size_bytes bigint
+  updated_at timestamptz
+  format ReportFormat [not null]
+  public_id uuid [not null, unique]
+  status ReportStatus [not null]
+  final_integrity_status IntegrityStatus
+  checksum_sha256 varchar(64)
+  failure_reason varchar(500)
+  storage_path varchar(512)
+  summary_snapshot jsonb
+
+  Indexes {
+    (exam_attempt_id, version) [unique, name: 'uk_proctoring_reports_version']
+    exam_attempt_id [name: 'ix_proctoring_reports_attempt']
+    status [name: 'ix_proctoring_reports_status']
+  }
+}
+
+Table attempt_timelines {
+  entry_count integer [not null]
+  version integer [not null]
+  created_at timestamptz [not null]
+  exam_attempt_id bigint [not null]
+  generated_by_user_id bigint
+  id bigint [pk, increment]
+  rendered_at timestamptz [not null]
+  updated_at timestamptz
+  checksum_sha256 varchar(64)
+  timeline_json jsonb
+
+  Indexes {
+    (exam_attempt_id, version) [unique, name: 'uk_attempt_timelines_version']
+    exam_attempt_id [name: 'ix_attempt_timelines_attempt']
+  }
+}
+
+// ---- Notifications ----
+
+Table notifications {
+  retry_count integer [not null]
+  created_at timestamptz [not null]
+  delivered_at timestamptz
+  id bigint [pk, increment]
+  next_retry_at timestamptz
+  opened_at timestamptz
+  recipient_user_id bigint [not null]
+  related_entity_id bigint
+  scheduled_for timestamptz
+  sent_at timestamptz
+  template_id bigint
+  updated_at timestamptz
+  channel NotificationChannel [not null]
+  status NotificationStatus [not null]
+  notification_type NotificationType [not null]
+  related_entity_type varchar(48)
+  idempotency_key varchar(128) [unique]
+  provider_message_id varchar(128)
+  failure_reason varchar(500)
+  body varchar(8000) [not null]
+  sent_to varchar(255) [not null]
+  subject varchar(255)
+  variables jsonb
+
+  Indexes {
+    (recipient_user_id, created_at) [name: 'ix_notifications_recipient']
+    (status, next_retry_at) [name: 'ix_notifications_status']
+    (related_entity_type, related_entity_id) [name: 'ix_notifications_related']
+  }
+}
+
+Table notification_templates {
+  is_active boolean [not null]
+  version integer [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  locale varchar(8) [not null]
+  updated_at timestamptz
+  channel NotificationChannel [not null]
+  notification_type NotificationType [not null]
+  expected_variables varchar(500)
+  body_template varchar(8000) [not null]
+  subject_template varchar(255)
+
+  Indexes {
+    (notification_type, channel, locale) [unique, name: 'uk_notification_templates']
+  }
+}
+
+Table notification_suppressions {
+  is_active boolean [not null]
+  max_per_window integer
+  window_end_local time
+  window_seconds integer
+  window_start_local time
+  created_at timestamptz [not null]
+  created_by_user_id bigint
+  id bigint [pk, increment]
+  recipient_user_id bigint
+  updated_at timestamptz
+  channel NotificationChannel
+  suppression_kind SuppressionKind [not null]
+  notification_type NotificationType
+
+  Indexes {
+    recipient_user_id [name: 'ix_notification_suppressions_recipient']
+  }
+}
+
+// ---- Audit ----
+
+Table audit_logs {
+  actor_user_id bigint
+  created_at timestamptz [not null]
+  entity_id bigint
+  id bigint [pk, increment]
+  occurred_at timestamptz [not null]
+  updated_at timestamptz
+  outcome AuditOutcome [not null]
+  action AuditAction [not null]
+  ip_address varchar(45)
+  actor_role varchar(48)
+  entity_type varchar(64) [not null]
+  request_id varchar(64)
+  user_agent varchar(512)
+  reason varchar(1000)
+  entity_label varchar(255)
+  after_state jsonb
+  before_state jsonb
+
+  Indexes {
+    (actor_user_id, occurred_at) [name: 'ix_audit_logs_actor']
+    (entity_type, entity_id) [name: 'ix_audit_logs_entity']
+    (action, occurred_at) [name: 'ix_audit_logs_action']
+  }
+}
+
+// ---- AI Model Registry ----
+
+Table ai_models {
+  is_active boolean [not null]
+  runs_on_client boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  updated_at timestamptz
+  purpose ModelPurpose [not null]
+  code varchar(64) [not null, unique]
+  vendor varchar(100)
+  name varchar(150) [not null]
+  description varchar(1000)
+
+  Indexes {
+    purpose [name: 'ix_ai_models_purpose']
+  }
+}
+
+Table ai_model_versions {
+  confidence_threshold numeric(5,4) [not null]
+  detection_threshold numeric(5,4) [not null]
+  activated_at timestamptz
+  activated_by_user_id bigint
+  ai_model_id bigint [not null]
+  created_at timestamptz [not null]
+  deprecated_at timestamptz
+  id bigint [pk, increment]
+  updated_at timestamptz
+  status ModelVersionStatus [not null]
+  version varchar(32) [not null]
+  artifact_checksum varchar(64)
+  artifact_ref varchar(512)
+  release_notes varchar(2000)
+  configuration jsonb
+
+  Indexes {
+    (ai_model_id, version) [unique, name: 'uk_ai_model_versions']
+    status [name: 'ix_ai_model_versions_status']
+  }
+}
+
+Table model_performance_metrics {
+  metric_value numeric(12,4) [not null]
+  ai_model_version_id bigint [not null]
+  computed_at timestamptz [not null]
+  created_at timestamptz [not null]
+  false_negative_count bigint
+  false_positive_count bigint
+  id bigint [pk, increment]
+  sample_count bigint [not null]
+  true_positive_count bigint
+  updated_at timestamptz
+  window_end_at timestamptz [not null]
+  window_start_at timestamptz [not null]
+  metric_type MetricType [not null]
+  note varchar(500)
+
+  Indexes {
+    (ai_model_version_id, metric_type, window_start_at) [unique, name: 'uk_model_performance']
+    (ai_model_version_id, window_start_at) [name: 'ix_model_performance_version']
+  }
+}
+
+Table shadow_evaluations {
+  active_false_positive_rate numeric(6,4)
+  shadow_false_positive_rate numeric(6,4)
+  active_only_detections bigint [not null]
+  active_version_id bigint [not null]
+  agreement_count bigint [not null]
+  computed_at timestamptz [not null]
+  created_at timestamptz [not null]
+  disagreement_count bigint [not null]
+  id bigint [pk, increment]
+  shadow_only_detections bigint [not null]
+  shadow_version_id bigint [not null]
+  updated_at timestamptz
+  window_end_at timestamptz [not null]
+  window_start_at timestamptz [not null]
+  recommendation ShadowRecommendation
+
+  Indexes {
+    (shadow_version_id, active_version_id) [name: 'ix_shadow_evaluations_versions']
+  }
+}
+
+// ---- System Configuration ----
+
+Table system_settings {
+  is_editable boolean [not null]
+  is_secret boolean [not null]
+  requires_restart boolean [not null]
+  created_at timestamptz [not null]
+  id bigint [pk, increment]
+  last_changed_at timestamptz
+  updated_at timestamptz
+  updated_by_user_id bigint
+  value_type SettingValueType [not null]
+  category SettingCategory [not null]
+  setting_key varchar(128) [not null, unique]
+  description varchar(500)
+  default_value varchar(4000)
+  setting_value varchar(4000)
+  validation_rule varchar(255)
+
+  Indexes {
+    category [name: 'ix_system_settings_category']
+  }
+}
+
+Table risk_factor_configs {
+  base_weight numeric(6,3) [not null]
+  confidence_multiplier numeric(6,3) [not null]
+  decay_half_life_seconds integer
+  duration_weight_per_second numeric(6,3)
+  frequency_increment numeric(6,3)
+  grace_occurrences integer [not null]
+  is_active boolean [not null]
+  is_immediate_critical boolean [not null]
+  max_contribution numeric(6,2)
+  min_confidence numeric(5,4)
+  created_at timestamptz [not null]
+  effective_from timestamptz [not null]
+  effective_to timestamptz
+  id bigint [pk, increment]
+  updated_at timestamptz
+  severity EventSeverity [not null]
+  config_version varchar(32) [not null]
+  trigger_kind RiskFactorTrigger [not null]
+  trigger_code varchar(48) [not null]
+  factor_code varchar(64) [not null]
+  factor_label varchar(150) [not null]
+
+  Indexes {
+    (factor_code, config_version) [unique, name: 'uk_risk_factor_configs']
+    is_active [name: 'ix_risk_factor_configs_active']
+    (trigger_kind, trigger_code) [name: 'ix_risk_factor_configs_trigger']
+  }
+}
+
+Table risk_level_thresholds {
+  alerts_proctor boolean [not null]
+  is_active boolean [not null]
+  max_score numeric(5,2)
+  min_score numeric(5,2) [not null]
+  opens_review_case boolean [not null]
+  withholds_result boolean [not null]
+  created_at timestamptz [not null]
+  effective_from timestamptz [not null]
+  effective_to timestamptz
+  id bigint [pk, increment]
+  updated_at timestamptz
+  display_colour varchar(16)
+  risk_level RiskLevel [not null]
+  auto_action AutoAction [not null]
+  config_version varchar(32) [not null]
+  recommendation RiskRecommendation [not null]
+
+  Indexes {
+    (config_version, risk_level) [unique, name: 'uk_risk_level_thresholds']
+    (is_active, min_score) [name: 'ix_risk_level_thresholds_active']
+  }
+}
+
+//------------------------------------------------------------------//
+// Table groups (for dbdiagram.io layout)
+//------------------------------------------------------------------//
+
+TableGroup "Authentication & Access" {
+  users
+  roles
+  permissions
+  role_permission
+  user_role
+  user_sessions
+  security_tokens
+  login_attempts
+  api_clients
+}
+
+TableGroup "Payment" {
+  payment_customers
+  payment_cards
+  payment_transactions
+}
+
+TableGroup "Student Groups" {
+  student_groups
+  group_memberships
+}
+
+TableGroup "Exam Definition" {
+  exams
+  exam_sections
+  exam_questions
+  exam_assignments
+  exam_group_assignments
+  exam_invitations
+  exam_prerequisites
+  exam_payment_requirements
+  exam_payment_charges
+  retake_grants
+  exam_window_overrides
+}
+
+TableGroup "Question Bank" {
+  questions
+  question_options
+  question_categories
+  question_tags
+  question_tag_link
+  code_test_cases
+  excel_cell_bindings
+  question_calibrations
+}
+
+TableGroup "Pre-Exam System Check" {
+  system_checks
+  system_check_items
+}
+
+TableGroup "Identity Verification" {
+  identity_verifications
+}
+
+TableGroup "Consent & Privacy" {
+  privacy_notices
+  consent_records
+}
+
+TableGroup "Exam Session & Attempts" {
+  exam_attempts
+  attempt_answers
+  attempt_answer_options
+  answer_revisions
+  question_states
+  attempt_pause_requests
+  code_execution_results
+  excel_grade_results
+  attempt_resumptions
+  question_form_fingerprints
+  answer_timing_anomalies
+}
+
+TableGroup "Excel Runtime" {
+  excel_sessions
+  excel_cell_edits
+  excel_sheet_operations
+  excel_macro_executions
+}
+
+TableGroup "Proctoring Sessions" {
+  proctoring_sessions
+  proctoring_events
+  device_sessions
+  evidence_files
+  evidence_access_logs
+  live_session_status
+  device_trust_records
+  evidence_custody_records
+  proctor_shifts
+  proctor_actions
+}
+
+TableGroup "AI Detection" {
+  ai_detections
+  face_detections
+  object_detections
+  behavior_detections
+  audio_detections
+  suspicious_activities
+}
+
+TableGroup "Risk Engine" {
+  risk_assessments
+  risk_events
+}
+
+TableGroup "Review System" {
+  review_cases
+  review_decisions
+  review_findings
+  review_notes
+}
+
+TableGroup "Exam Results" {
+  exam_results
+  result_details
+  result_withholdings
+}
+
+TableGroup "Proctoring Reports" {
+  proctoring_reports
+  attempt_timelines
+}
+
+TableGroup "Notifications" {
+  notifications
+  notification_templates
+  notification_suppressions
+}
+
+TableGroup "Audit" {
+  audit_logs
+}
+
+TableGroup "AI Model Registry" {
+  ai_models
+  ai_model_versions
+  model_performance_metrics
+  shadow_evaluations
+}
+
+TableGroup "System Configuration" {
+  system_settings
+  risk_factor_configs
+  risk_level_thresholds
+}
+
+//------------------------------------------------------------------//
+// References (164 foreign keys)
+//------------------------------------------------------------------//
+
+Ref fk_ai_detections_event: ai_detections.proctoring_event_id > proctoring_events.id
+Ref fk_ai_detections_evidence: ai_detections.evidence_file_id > evidence_files.id
+Ref fk_ai_detections_model_version: ai_detections.ai_model_version_id > ai_model_versions.id
+Ref fk_ai_detections_session: ai_detections.proctoring_session_id > proctoring_sessions.id
+Ref fk_ai_model_versions_activated_by: ai_model_versions.activated_by_user_id > users.id
+Ref fk_ai_model_versions_model: ai_model_versions.ai_model_id > ai_models.id
+Ref fk_answer_revisions_answer: answer_revisions.attempt_answer_id > attempt_answers.id
+Ref fk_answer_timing_anomalies_answer: answer_timing_anomalies.attempt_answer_id > attempt_answers.id
+Ref fk_answer_timing_anomalies_attempt: answer_timing_anomalies.exam_attempt_id > exam_attempts.id
+Ref fk_answer_timing_anomalies_question: answer_timing_anomalies.exam_question_id > exam_questions.id
+Ref fk_api_clients_created_by: api_clients.created_by_user_id > users.id
+Ref fk_answer_options_answer: attempt_answer_options.attempt_answer_id > attempt_answers.id
+Ref fk_answer_options_option: attempt_answer_options.question_option_id > question_options.id
+Ref fk_attempt_answers_attempt: attempt_answers.exam_attempt_id > exam_attempts.id
+Ref fk_attempt_answers_exam_question: attempt_answers.exam_question_id > exam_questions.id
+Ref fk_attempt_answers_graded_by: attempt_answers.graded_by_user_id > users.id
+Ref fk_attempt_pause_requests_attempt: attempt_pause_requests.exam_attempt_id > exam_attempts.id
+Ref fk_attempt_pause_requests_decided_by: attempt_pause_requests.decided_by_user_id > users.id
+Ref fk_attempt_pause_requests_requested_by: attempt_pause_requests.requested_by_user_id > users.id
+Ref fk_attempt_resumptions_approved_by: attempt_resumptions.approved_by_user_id > users.id
+Ref fk_attempt_resumptions_attempt: attempt_resumptions.exam_attempt_id > exam_attempts.id
+Ref fk_attempt_resumptions_risk_event: attempt_resumptions.risk_event_id > risk_events.id
+Ref fk_attempt_timelines_attempt: attempt_timelines.exam_attempt_id > exam_attempts.id
+Ref fk_attempt_timelines_generated_by: attempt_timelines.generated_by_user_id > users.id
+Ref fk_audio_detections_detection: audio_detections.ai_detection_id > ai_detections.id
+Ref fk_audit_logs_actor: audit_logs.actor_user_id > users.id
+Ref fk_behavior_detections_detection: behavior_detections.ai_detection_id > ai_detections.id
+Ref fk_code_exec_results_answer: code_execution_results.attempt_answer_id > attempt_answers.id
+Ref fk_code_exec_results_test_case: code_execution_results.code_test_case_id > code_test_cases.id
+Ref fk_code_test_cases_question: code_test_cases.question_id > questions.id
+Ref fk_consent_records_attempt: consent_records.exam_attempt_id > exam_attempts.id
+Ref fk_consent_records_notice: consent_records.privacy_notice_id > privacy_notices.id
+Ref fk_device_sessions_session: device_sessions.proctoring_session_id > proctoring_sessions.id
+Ref fk_device_trust_records_exam: device_trust_records.exam_id > exams.id
+Ref fk_evidence_access_actor: evidence_access_logs.actor_user_id > users.id
+Ref fk_evidence_access_file: evidence_access_logs.evidence_file_id > evidence_files.id
+Ref fk_evidence_custody_records_actor: evidence_custody_records.actor_user_id > users.id
+Ref fk_evidence_custody_records_client: evidence_custody_records.actor_api_client_id > api_clients.id
+Ref fk_evidence_custody_records_file: evidence_custody_records.evidence_file_id > evidence_files.id
+Ref fk_evidence_files_event: evidence_files.proctoring_event_id > proctoring_events.id
+Ref fk_evidence_files_session: evidence_files.proctoring_session_id > proctoring_sessions.id
+Ref fk_exam_assignments_assigned_by: exam_assignments.assigned_by_user_id > users.id
+Ref fk_exam_assignments_candidate: exam_assignments.candidate_user_id > users.id
+Ref fk_exam_assignments_exam: exam_assignments.exam_id > exams.id
+Ref fk_exam_attempts_assignment: exam_attempts.exam_assignment_id > exam_assignments.id
+Ref fk_exam_attempts_candidate: exam_attempts.candidate_user_id > users.id
+Ref fk_exam_attempts_current_section: exam_attempts.current_section_id > exam_sections.id
+Ref fk_exam_attempts_exam: exam_attempts.exam_id > exams.id
+Ref fk_exam_group_assignments_assigned_by: exam_group_assignments.assigned_by_user_id > users.id
+Ref fk_exam_group_assignments_exam: exam_group_assignments.exam_id > exams.id
+Ref fk_exam_group_assignments_group: exam_group_assignments.student_group_id > student_groups.id
+Ref fk_exam_invitations_assignment: exam_invitations.exam_assignment_id > exam_assignments.id
+Ref fk_exam_payment_charges_exam: exam_payment_charges.exam_id > exams.id
+Ref fk_exam_payment_charges_attempt: exam_payment_charges.exam_attempt_id > exam_attempts.id
+Ref fk_exam_payment_charges_assignment: exam_payment_charges.exam_assignment_id > exam_assignments.id
+Ref fk_exam_payment_charges_requirement: exam_payment_charges.exam_payment_requirement_id > exam_payment_requirements.id
+Ref fk_exam_payment_charges_transaction: exam_payment_charges.payment_transaction_id > payment_transactions.id
+Ref fk_exam_payment_charges_candidate: exam_payment_charges.candidate_user_id > users.id
+Ref fk_exam_payment_requirements_exam: exam_payment_requirements.exam_id > exams.id
+Ref fk_exam_prerequisites_exam: exam_prerequisites.exam_id > exams.id
+Ref fk_exam_prerequisites_required_exam: exam_prerequisites.required_exam_id > exams.id
+Ref fk_exam_questions_question: exam_questions.question_id > questions.id
+Ref fk_exam_questions_section: exam_questions.exam_section_id > exam_sections.id
+Ref fk_exam_results_attempt: exam_results.exam_attempt_id > exam_attempts.id
+Ref fk_exam_results_candidate: exam_results.candidate_user_id > users.id
+Ref fk_exam_results_exam: exam_results.exam_id > exams.id
+Ref fk_exam_results_graded_by: exam_results.graded_by_user_id > users.id
+Ref fk_exam_results_review_case: exam_results.review_case_id > review_cases.id
+Ref fk_exam_sections_exam: exam_sections.exam_id > exams.id
+Ref fk_exam_window_overrides_assignment: exam_window_overrides.exam_assignment_id > exam_assignments.id
+Ref fk_exam_window_overrides_granted_by: exam_window_overrides.granted_by_user_id > users.id
+Ref fk_exam_window_overrides_supersedes: exam_window_overrides.supersedes_override_id > exam_window_overrides.id
+Ref fk_exams_created_by: exams.created_by_user_id > users.id
+Ref fk_excel_cell_bindings_question: excel_cell_bindings.question_id > questions.id
+Ref fk_excel_cell_edits_session: excel_cell_edits.excel_session_id > excel_sessions.id
+Ref fk_excel_grade_results_answer: excel_grade_results.attempt_answer_id > attempt_answers.id
+Ref fk_excel_grade_results_binding: excel_grade_results.excel_cell_binding_id > excel_cell_bindings.id
+Ref fk_excel_macro_executions_session: excel_macro_executions.excel_session_id > excel_sessions.id
+Ref fk_excel_sessions_attempt: excel_sessions.exam_attempt_id > exam_attempts.id
+Ref fk_excel_sessions_proctoring_session: excel_sessions.proctoring_session_id > proctoring_sessions.id
+Ref fk_excel_sheet_operations_session: excel_sheet_operations.excel_session_id > excel_sessions.id
+Ref fk_face_detections_detection: face_detections.ai_detection_id > ai_detections.id
+Ref fk_group_memberships_added_by: group_memberships.added_by_user_id > users.id
+Ref fk_group_memberships_group: group_memberships.student_group_id > student_groups.id
+Ref fk_group_memberships_user: group_memberships.user_id > users.id
+Ref fk_identity_verifications_attempt: identity_verifications.exam_attempt_id > exam_attempts.id
+Ref fk_identity_verifications_candidate: identity_verifications.candidate_user_id > users.id
+Ref fk_identity_verifications_evidence: identity_verifications.captured_evidence_id > evidence_files.id
+Ref fk_identity_verifications_session: identity_verifications.proctoring_session_id > proctoring_sessions.id
+Ref fk_identity_verifications_verified_by: identity_verifications.verified_by_user_id > users.id
+Ref fk_live_session_status_session: live_session_status.proctoring_session_id > proctoring_sessions.id
+Ref fk_login_attempts_user: login_attempts.user_id > users.id
+Ref fk_model_performance_version: model_performance_metrics.ai_model_version_id > ai_model_versions.id
+Ref fk_notification_suppressions_created_by: notification_suppressions.created_by_user_id > users.id
+Ref fk_notification_suppressions_recipient: notification_suppressions.recipient_user_id > users.id
+Ref fk_notifications_recipient: notifications.recipient_user_id > users.id
+Ref fk_notifications_template: notifications.template_id > notification_templates.id
+Ref fk_object_detections_detection: object_detections.ai_detection_id > ai_detections.id
+Ref fk_payment_cards_customer: payment_cards.payment_customer_id > payment_customers.id
+Ref fk_payment_cards_user: payment_cards.user_id > users.id
+Ref fk_payment_customers_user: payment_customers.user_id > users.id
+Ref fk_payment_customers_default_card: payment_customers.default_payment_card_id > payment_cards.id
+Ref fk_payment_transactions_customer: payment_transactions.payment_customer_id > payment_customers.id
+Ref fk_payment_transactions_card: payment_transactions.payment_card_id > payment_cards.id
+Ref fk_payment_transactions_parent: payment_transactions.parent_transaction_id > payment_transactions.id
+Ref fk_payment_transactions_initiated_by: payment_transactions.initiated_by_user_id > users.id
+Ref fk_proctor_actions_event: proctor_actions.proctoring_event_id > proctoring_events.id
+Ref fk_proctor_actions_proctor: proctor_actions.proctor_user_id > users.id
+Ref fk_proctor_actions_session: proctor_actions.proctoring_session_id > proctoring_sessions.id
+Ref fk_proctor_actions_shift: proctor_actions.proctor_shift_id > proctor_shifts.id
+Ref fk_proctor_actions_supervisor: proctor_actions.supervisor_approval_user_id > users.id
+Ref fk_proctor_shifts_proctor: proctor_shifts.proctor_user_id > users.id
+Ref fk_proctor_shifts_session: proctor_shifts.proctoring_session_id > proctoring_sessions.id
+Ref fk_proctoring_events_device: proctoring_events.device_session_id > device_sessions.id
+Ref fk_proctoring_events_session: proctoring_events.proctoring_session_id > proctoring_sessions.id
+Ref fk_proctoring_reports_attempt: proctoring_reports.exam_attempt_id > exam_attempts.id
+Ref fk_proctoring_reports_case: proctoring_reports.review_case_id > review_cases.id
+Ref fk_proctoring_reports_requested_by: proctoring_reports.requested_by_user_id > users.id
+Ref fk_proctoring_reports_risk: proctoring_reports.risk_assessment_id > risk_assessments.id
+Ref fk_proctoring_reports_session: proctoring_reports.proctoring_session_id > proctoring_sessions.id
+Ref fk_proctoring_sessions_attempt: proctoring_sessions.exam_attempt_id > exam_attempts.id
+Ref fk_proctoring_sessions_identity_by: proctoring_sessions.identity_verified_by_user_id > users.id
+Ref fk_proctoring_sessions_proctor: proctoring_sessions.assigned_proctor_user_id > users.id
+Ref fk_question_calibrations_question: question_calibrations.question_id > questions.id
+Ref fk_question_categories_parent: question_categories.parent_category_id > question_categories.id
+Ref fk_question_form_fingerprints_attempt: question_form_fingerprints.exam_attempt_id > exam_attempts.id
+Ref fk_question_form_fingerprints_exam: question_form_fingerprints.exam_id > exams.id
+Ref fk_question_options_question: question_options.question_id > questions.id
+Ref fk_question_states_attempt: question_states.exam_attempt_id > exam_attempts.id
+Ref fk_question_states_exam_question: question_states.exam_question_id > exam_questions.id
+Ref fk_question_tag_link_question: question_tag_link.question_id > questions.id
+Ref fk_question_tag_link_tag: question_tag_link.question_tag_id > question_tags.id
+Ref fk_questions_category: questions.question_category_id > question_categories.id
+Ref fk_questions_created_by: questions.created_by_user_id > users.id
+Ref fk_questions_parent: questions.parent_question_id > questions.id
+Ref fk_result_details_answer: result_details.attempt_answer_id > attempt_answers.id
+Ref fk_result_details_exam_question: result_details.exam_question_id > exam_questions.id
+Ref fk_result_details_result: result_details.exam_result_id > exam_results.id
+Ref fk_result_details_section: result_details.exam_section_id > exam_sections.id
+Ref fk_result_withholdings_case: result_withholdings.review_case_id > review_cases.id
+Ref fk_result_withholdings_released_by: result_withholdings.released_by_user_id > users.id
+Ref fk_result_withholdings_result: result_withholdings.exam_result_id > exam_results.id
+Ref fk_result_withholdings_risk: result_withholdings.risk_assessment_id > risk_assessments.id
+Ref fk_result_withholdings_withheld_by: result_withholdings.withheld_by_user_id > users.id
+Ref fk_retake_grants_assignment: retake_grants.exam_assignment_id > exam_assignments.id
+Ref fk_retake_grants_candidate: retake_grants.candidate_user_id > users.id
+Ref fk_retake_grants_consumed_by: retake_grants.consumed_by_attempt_id > exam_attempts.id
+Ref fk_retake_grants_decision: retake_grants.review_decision_id > review_decisions.id
+Ref fk_retake_grants_granted_by: retake_grants.granted_by_user_id > users.id
+Ref fk_retake_grants_supersedes: retake_grants.supersedes_grant_id > retake_grants.id
+Ref fk_review_cases_attempt: review_cases.exam_attempt_id > exam_attempts.id
+Ref fk_review_cases_opened_by: review_cases.opened_by_user_id > users.id
+Ref fk_review_cases_reviewer: review_cases.assigned_reviewer_user_id > users.id
+Ref fk_review_cases_risk_assessment: review_cases.risk_assessment_id > risk_assessments.id
+Ref fk_review_decisions_case: review_decisions.review_case_id > review_cases.id
+Ref fk_review_decisions_reviewer: review_decisions.reviewer_user_id > users.id
+Ref fk_review_decisions_supersedes: review_decisions.supersedes_decision_id > review_decisions.id
+Ref fk_review_findings_case: review_findings.review_case_id > review_cases.id
+Ref fk_review_findings_reviewer: review_findings.reviewer_user_id > users.id
+Ref fk_review_notes_author: review_notes.author_user_id > users.id
+Ref fk_review_notes_case: review_notes.review_case_id > review_cases.id
+Ref fk_risk_assessments_attempt: risk_assessments.exam_attempt_id > exam_attempts.id
+Ref fk_risk_assessments_session: risk_assessments.proctoring_session_id > proctoring_sessions.id
+Ref fk_risk_events_assessment: risk_events.risk_assessment_id > risk_assessments.id
+Ref fk_risk_events_detection: risk_events.ai_detection_id > ai_detections.id
+Ref fk_risk_events_proctoring_event: risk_events.proctoring_event_id > proctoring_events.id
+Ref fk_role_permission_granted_by: role_permission.granted_by_user_id > users.id
+Ref fk_role_permission_permission: role_permission.permission_id > permissions.id
+Ref fk_role_permission_role: role_permission.role_id > roles.id
+Ref fk_security_tokens_user: security_tokens.user_id > users.id
+Ref fk_shadow_evaluations_active: shadow_evaluations.active_version_id > ai_model_versions.id
+Ref fk_shadow_evaluations_shadow: shadow_evaluations.shadow_version_id > ai_model_versions.id
+Ref fk_student_groups_owner: student_groups.owner_user_id > users.id
+Ref fk_student_groups_parent: student_groups.parent_group_id > student_groups.id
+Ref fk_suspicious_activities_adjudicated_by: suspicious_activities.adjudicated_by_user_id > users.id
+Ref fk_suspicious_activities_attempt: suspicious_activities.exam_attempt_id > exam_attempts.id
+Ref fk_suspicious_activities_detection: suspicious_activities.primary_detection_id > ai_detections.id
+Ref fk_suspicious_activities_session: suspicious_activities.proctoring_session_id > proctoring_sessions.id
+Ref fk_system_check_items_run: system_check_items.system_check_id > system_checks.id
+Ref fk_system_checks_attempt: system_checks.exam_attempt_id > exam_attempts.id
+Ref fk_system_checks_candidate: system_checks.candidate_user_id > users.id
+Ref fk_system_checks_exam: system_checks.exam_id > exams.id
+Ref fk_system_checks_overridden_by: system_checks.overridden_by_user_id > users.id
+Ref fk_system_settings_updated_by: system_settings.updated_by_user_id > users.id
+Ref fk_user_role_granted_by: user_role.granted_by_user_id > users.id
+Ref fk_user_role_role: user_role.role_id > roles.id
+Ref fk_user_role_user: user_role.user_id > users.id
+Ref fk_user_sessions_user: user_sessions.user_id > users.id
